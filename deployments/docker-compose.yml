@@ -1,0 +1,16 @@
+version: "3.7"
+services:
+  container_name: refit-backend
+  build:
+    context:
+    dockerfile: dockerfile
+  restart: always
+  volumes: []
+  labels:
+    -
+  networks:
+    - traefiknet
+
+networks:
+  traefiknet:
+    external: true
