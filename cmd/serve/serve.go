@@ -3,13 +3,15 @@ package serve
 import (
 	"context"
 	"database/sql"
-	"github.com/labstack/echo"
 	"log"
-	"net/http"
 	"os"
 	"os/signal"
+	"refit_backend/internal/http/router"
 	"refit_backend/internal/logger"
 	"refit_backend/internal/mysql"
+
+	"github.com/labstack/echo"
+
 	"time"
 )
 
@@ -19,12 +21,13 @@ type IAppServe interface {
 	GetCtx() context.Context
 	GetEchoHTTP() *echo.Echo
 	GetLogger() logger.Logger
-	GetMySQL() *sql.DB
+	GetDBMySQL() *sql.DB
 
 	// Initiator
-	InitLogger()
-	InitHTTP()
 	InitCtx()
+	InitLogger()
+	InitMySQL()
+	InitHTTP()
 }
 
 // AppServe struct
@@ -32,7 +35,7 @@ type appServe struct {
 	ctx      context.Context
 	echoHTTP *echo.Echo
 	logger   logger.Logger
-	mysql    *sql.DB
+	mysql    mysql.IDBMySQL
 }
 
 func (a *appServe) GetEchoHTTP() *echo.Echo {
@@ -47,8 +50,8 @@ func (a *appServe) GetLogger() logger.Logger {
 	return a.logger
 }
 
-func (a *appServe) GetMySQL() *sql.DB {
-	return a.mysql
+func (a *appServe) GetDBMySQL() *sql.DB {
+	return a.mysql.GetDB()
 }
 
 func (a *appServe) InitLogger() {
@@ -75,21 +78,16 @@ func (a *appServe) InitLogger() {
 }
 
 func (a *appServe) InitMySQL() {
-	db, err := mysql.CreateConnection()
+	a.mysql = mysql.NewDBMySQL()
+	err := a.mysql.CreateConnection()
 	if err != nil {
-		a.logger.Fatalf("could not create mysql connectioon: %s", err.Error())
+		a.GetLogger().Fatalf("could not create to mysql database: %s", err.Error())
 	}
-	a.mysql = db
 }
 
 func (a *appServe) InitHTTP() {
 	e := echo.New()
-
-	e.GET("/", func(c echo.Context) error {
-		time.Sleep(5 * time.Second)
-		return c.JSON(http.StatusOK, "OK")
-	})
-
+	router.SetHTTPRouter(e)
 	a.echoHTTP = e
 }
 
@@ -97,16 +95,17 @@ func (a *appServe) InitCtx() {
 	a.ctx = context.Background()
 }
 
-func getAppServe() IAppServe {
+func newAppServe() IAppServe {
 	return &appServe{}
 }
 
 // Start Serve App
 func Start() {
-	app := getAppServe()
+	app := newAppServe()
 
 	app.InitCtx()
 	app.InitLogger()
+	app.InitMySQL()
 	app.InitHTTP()
 
 	// Start server
