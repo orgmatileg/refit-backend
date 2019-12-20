@@ -3,15 +3,13 @@ package serve
 import (
 	"context"
 	"database/sql"
+	"github.com/labstack/echo"
 	"log"
 	"os"
 	"os/signal"
-	"refit_backend/internal/http/router"
+	"refit_backend/internal/http"
 	"refit_backend/internal/logger"
 	"refit_backend/internal/mysql"
-
-	"github.com/labstack/echo"
-
 	"time"
 )
 
@@ -19,7 +17,7 @@ import (
 type IAppServe interface {
 	// Getter
 	GetCtx() context.Context
-	GetEchoHTTP() *echo.Echo
+	GetHTTP() *echo.Echo
 	GetLogger() logger.Logger
 	GetDBMySQL() *sql.DB
 
@@ -32,14 +30,14 @@ type IAppServe interface {
 
 // AppServe struct
 type appServe struct {
-	ctx      context.Context
-	echoHTTP *echo.Echo
-	logger   logger.Logger
-	mysql    mysql.IDBMySQL
+	ctx    context.Context
+	http   http.IServerHTTP
+	logger logger.Logger
+	mysql  mysql.IDBMySQL
 }
 
-func (a *appServe) GetEchoHTTP() *echo.Echo {
-	return a.echoHTTP
+func (a *appServe) GetHTTP() *echo.Echo {
+	return a.http.GetHTTP()
 }
 
 func (a *appServe) GetCtx() context.Context {
@@ -86,9 +84,9 @@ func (a *appServe) InitMySQL() {
 }
 
 func (a *appServe) InitHTTP() {
-	e := echo.New()
-	router.SetHTTPRouter(e)
-	a.echoHTTP = e
+	a.http = http.NewServerHTTP()
+	a.http.InitMiddleWare()
+	a.http.InitRouter()
 }
 
 func (a *appServe) InitCtx() {
@@ -110,7 +108,7 @@ func Start() {
 
 	// Start server
 	go func() {
-		if err := app.GetEchoHTTP().Start(":1323"); err != nil {
+		if err := app.GetHTTP().Start(":1323"); err != nil {
 			app.GetLogger().Infof("could not start HTTP Server: %s", err.Error())
 		}
 	}()
@@ -123,8 +121,7 @@ func Start() {
 
 	ctx, cancel := context.WithTimeout(app.GetCtx(), 10*time.Second)
 	defer cancel()
-	if err := app.GetEchoHTTP().Shutdown(ctx); err != nil {
+	if err := app.GetHTTP().Shutdown(ctx); err != nil {
 		app.GetLogger().Fatalf("could not shutdown HTTP Server: %s", err.Error())
 	}
-
 }

@@ -2,6 +2,7 @@ package mysql
 
 import (
 	"database/sql"
+	"time"
 	// mysql need this
 	_ "github.com/go-sql-driver/mysql"
 )
@@ -40,6 +41,9 @@ func (d *DBMySQL) CreateConnection() error {
 	if err != nil {
 		return err
 	}
+	d.db.SetMaxOpenConns(100)
+	d.db.SetMaxIdleConns(10)
+	d.db.SetConnMaxLifetime(time.Duration(300 * time.Second))
 	d.db = db
 	return nil
 }
