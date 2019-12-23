@@ -1,0 +1,11 @@
+mysql:
+  host: luqmanul.com
+  username: root
+  password: masuk123
+  port: 3306
+
+mongo:
+  host: luqmanul.com
+  username: root
+  password: masuk123
+  port: 27017

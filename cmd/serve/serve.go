@@ -7,9 +7,10 @@ import (
 	"log"
 	"os"
 	"os/signal"
-	"refit_backend/internal/http"
+	"refit_backend/internal/delivery/http"
+	"refit_backend/internal/infrastructures/mysql"
 	"refit_backend/internal/logger"
-	"refit_backend/internal/mysql"
+	"refit_backend/internal/repository"
 	"time"
 )
 
@@ -18,7 +19,6 @@ type IAppServe interface {
 	// Getter
 	GetCtx() context.Context
 	GetHTTP() *echo.Echo
-	GetLogger() logger.Logger
 	GetDBMySQL() *sql.DB
 
 	// Initiator
@@ -30,10 +30,11 @@ type IAppServe interface {
 
 // AppServe struct
 type appServe struct {
-	ctx    context.Context
-	http   http.IServerHTTP
-	logger logger.Logger
-	mysql  mysql.IDBMySQL
+	ctx        context.Context
+	http       http.IServerHTTP
+	mysql      *sql.DB
+	logger     logger.Logger
+	repository repository.IRepository
 }
 
 func (a *appServe) GetHTTP() *echo.Echo {
@@ -44,12 +45,8 @@ func (a *appServe) GetCtx() context.Context {
 	return a.ctx
 }
 
-func (a *appServe) GetLogger() logger.Logger {
-	return a.logger
-}
-
 func (a *appServe) GetDBMySQL() *sql.DB {
-	return a.mysql.GetDB()
+	return a.mysql
 }
 
 func (a *appServe) InitLogger() {
@@ -67,20 +64,10 @@ func (a *appServe) InitLogger() {
 	if err != nil {
 		log.Fatalf("Could not instantiate log %s", err.Error())
 	}
-
-	loggerz := logger.WithFields(
-		logger.Fields{"logger_instance": "zap"},
-	)
-
-	a.logger = loggerz
 }
 
 func (a *appServe) InitMySQL() {
-	a.mysql = mysql.NewDBMySQL()
-	err := a.mysql.CreateConnection()
-	if err != nil {
-		a.GetLogger().Fatalf("could not create to mysql database: %s", err.Error())
-	}
+	a.mysql = mysql.GetDB()
 }
 
 func (a *appServe) InitHTTP() {
@@ -101,6 +88,7 @@ func newAppServe() IAppServe {
 func Start() {
 	app := newAppServe()
 
+	// Initiator
 	app.InitCtx()
 	app.InitLogger()
 	app.InitMySQL()
@@ -109,7 +97,7 @@ func Start() {
 	// Start server
 	go func() {
 		if err := app.GetHTTP().Start(":1323"); err != nil {
-			app.GetLogger().Infof("could not start HTTP Server: %s", err.Error())
+			logger.Infof("could not start HTTP Server: %s", err.Error())
 		}
 	}()
 
@@ -117,11 +105,12 @@ func Start() {
 	quit := make(chan os.Signal)
 	signal.Notify(quit, os.Interrupt)
 	<-quit
-	app.GetLogger().Infof("Shutting down HTTP Server")
+
+	logger.Infof("Shutting down HTTP Server")
 
 	ctx, cancel := context.WithTimeout(app.GetCtx(), 10*time.Second)
 	defer cancel()
 	if err := app.GetHTTP().Shutdown(ctx); err != nil {
-		app.GetLogger().Fatalf("could not shutdown HTTP Server: %s", err.Error())
+		logger.Fatalf("could not shutdown HTTP Server: %s", err.Error())
 	}
 }

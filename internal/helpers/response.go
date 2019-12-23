@@ -15,8 +15,20 @@ func MakeDefaultResponse(c echo.Context, httpStatusCode int, data ...interface{}
 	r := ResponseDefault{
 		Code: httpStatusCode,
 	}
+
 	for _, d := range data {
-		r.Data = append(r.Data, d)
+		switch v := d.(type) {
+		case error:
+			r.Data = append(r.Data, struct {
+				Message string `json:"message"`
+			}{v.Error()})
+		case nil:
+			r.Data = make([]interface{}, 0)
+		default:
+			r.Data = append(r.Data, d)
+		}
+
 	}
+
 	return c.JSON(httpStatusCode, &r)
 }
