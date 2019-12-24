@@ -37,7 +37,16 @@ func (s *serverHTTP) GetHTTP() *echo.Echo {
 // InitMiddleWare ...
 func (s *serverHTTP) InitMiddleWare() {
 	s.http.Pre(middleware.RemoveTrailingSlash())
+	s.http.Pre(middleware.CORS())
+
 	// s.http.Pre(middleware.Logger())
+	// s.http.Pre(middleware.JWTWithConfig(middleware.JWTConfig{
+	// 	SigningKey:  []byte("secret"),
+	// 	TokenLookup: "query:token",
+	// }))
+
+	s.http.HTTPErrorHandler = s.GetHandler().Tools().DefaultErrorHandler
+
 }
 
 // InitRouter ...

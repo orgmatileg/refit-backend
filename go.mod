@@ -3,7 +3,10 @@ module refit_backend
 go 1.13
 
 require (
+	github.com/asaskevich/govalidator v0.0.0-20190424111038-f61b66f89f4a // indirect
 	github.com/dgrijalva/jwt-go v3.2.0+incompatible
+	github.com/go-ozzo/ozzo-validation v3.6.0+incompatible
+	github.com/go-ozzo/ozzo-validation/v3 v3.8.1
 	github.com/go-sql-driver/mysql v1.4.1
 	github.com/golang-migrate/migrate v3.5.4+incompatible
 	github.com/golang-migrate/migrate/v4 v4.7.0
@@ -24,6 +27,7 @@ require (
 	github.com/spf13/viper v1.6.1
 	github.com/valyala/fasttemplate v1.1.0 // indirect
 	github.com/ziutek/mymysql v1.5.4 // indirect
+	github.com/zoonman/gravatar v0.0.0-20180204165248-425d0fea1b45
 	go.uber.org/atomic v1.5.1 // indirect
 	go.uber.org/multierr v1.4.0 // indirect
 	go.uber.org/zap v1.13.0

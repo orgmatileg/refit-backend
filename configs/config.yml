@@ -1,3 +1,6 @@
+jwt:
+  secret: supersecret
+
 mysql:
   host: luqmanul.com
   username: root

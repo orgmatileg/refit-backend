@@ -2,18 +2,26 @@ package users
 
 import (
 	"context"
+	"database/sql"
 	"errors"
-	"golang.org/x/crypto/bcrypt"
+	"refit_backend/internal/helpers"
 	"refit_backend/internal/logger"
 	"refit_backend/internal/repository"
 	"refit_backend/models"
 	"strings"
 	"time"
+
+	"github.com/dgrijalva/jwt-go"
+	validation "github.com/go-ozzo/ozzo-validation/v3"
+
+	"github.com/go-ozzo/ozzo-validation/is"
+	"golang.org/x/crypto/bcrypt"
 )
 
+// IUsers interface
 type IUsers interface {
-	Create(ctx context.Context, m *models.User) (uint, error)
-	AuthLoginWithEmail(ctx context.Context, email string) (*models.User, error)
+	Create(ctx context.Context, mu *models.User) (userID uint, err error)
+	AuthLoginWithEmail(ctx context.Context, mu *models.User) (token string, err error)
 	FindAll(ctx context.Context)
 	Update(ctx context.Context)
 	Delete(ctx context.Context)
@@ -31,44 +39,86 @@ func New() IUsers {
 	}
 }
 
-// TODO: add validation
-func (u users) Create(ctx context.Context, mu *models.User) (uint, error) {
-	if len(mu.FullName) < 2 {
-		return 0, errors.New("invalid full_name: should greater than 2")
+// Create services users
+func (u users) Create(ctx context.Context, mu *models.User) (userID uint, err error) {
+
+	err = mu.Validate()
+	if err != nil {
+		logger.Infof("could not validate: %s", err.Error())
+		return 0, err
 	}
 
 	passwordHashed, err := bcrypt.GenerateFromPassword([]byte(mu.Password), bcrypt.DefaultCost)
 	if err != nil {
+		logger.Infof("could not hash password: %s", err.Error())
 		return 0, errors.New("could not hash password")
 	}
+
 	mu.Password = string(passwordHashed)
 	mu.RoleID = 2 // Set role_id to Normal User by default
 	mu.CreatedAt = time.Now()
 	mu.UpdatedAt = time.Now()
 
-	_, err = u.repository.Users().Create(ctx, mu)
+	userID, err = u.repository.Users().Create(ctx, mu)
 	if err != nil {
 		if strings.Contains(err.Error(), "Duplicate") {
+			logger.Infof("invalid email: email already used")
 			return 0, errors.New("invalid email: email already used")
 		}
+		logger.Infof("could not create user to db: %s", err.Error())
 		return 0, err
 	}
 
-	return 0, nil
+	return userID, nil
 }
 
 // AuthLoginWithEmail service
-func (u users) AuthLoginWithEmail(ctx context.Context, email string) (*models.User, error) {
-	if email == "" {
-		logger.Debugf("could not find user with empty string email")
-		return nil, errors.New("invalid email")
-	}
-	mu, err := u.repository.Users().FindOneByEmail(ctx, email)
+func (u users) AuthLoginWithEmail(ctx context.Context, ru *models.User) (token string, err error) {
+
+	err = validation.ValidateStruct(ru,
+		validation.Field(&ru.Email, validation.Required, is.Email),
+		validation.Field(&ru.Password, validation.Required),
+	)
 	if err != nil {
-		logger.Debugf("could not find user by email: %s", err.Error())
-		return nil, err
+		logger.Infof("could not validate: %s", err.Error())
+		return "", err
 	}
-	return mu, nil
+
+	mu, err := u.repository.Users().FindOneByEmail(ctx, ru.Email)
+
+	if err != nil {
+		switch {
+		case err == sql.ErrNoRows:
+			logger.Infof("could not find user by email: %s", err.Error())
+			return "", errors.New("email or password not exists")
+		default:
+			logger.Infof("could not find user by email: %s", err.Error())
+			return "", err
+		}
+	}
+
+	err = bcrypt.CompareHashAndPassword([]byte(mu.Password), []byte(ru.Password))
+	if err != nil {
+		logger.Warnf("could not compare hash password: %s", err.Error())
+		return "", errors.New("password yang Anda masukkan salah")
+	}
+
+	claims := helpers.JWTPayload{
+		StandardClaims: &jwt.StandardClaims{
+			Audience:  "MOBILE",
+			Issuer:    "Luqmanul Hakim API",
+			IssuedAt:  time.Now().Unix(),
+			ExpiresAt: time.Now().Add(time.Minute * time.Duration(1440)).Unix(),
+		},
+	}
+
+	token, err = helpers.GetJWTTokenGenerator().GenerateToken(claims)
+	if err != nil {
+		logger.Infof("could not generate token: %s", err.Error())
+		return "", err
+	}
+
+	return token, nil
 }
 func (u users) FindAll(ctx context.Context) {}
 func (u users) Update(ctx context.Context)  {}
