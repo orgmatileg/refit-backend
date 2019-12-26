@@ -1,11 +1,12 @@
 package auth
 
 import (
-	"github.com/labstack/echo"
 	"net/http"
 	"refit_backend/internal/helpers"
 	"refit_backend/internal/services"
 	"refit_backend/models"
+
+	"github.com/labstack/echo"
 )
 
 // IAuth interface

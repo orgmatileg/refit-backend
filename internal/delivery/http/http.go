@@ -36,6 +36,7 @@ func (s *serverHTTP) GetHTTP() *echo.Echo {
 
 // InitMiddleWare ...
 func (s *serverHTTP) InitMiddleWare() {
+
 	s.http.Pre(middleware.RemoveTrailingSlash())
 	s.http.Pre(middleware.CORS())
 
@@ -61,9 +62,9 @@ func (s *serverHTTP) InitRouter() {
 	routerUsers := s.http.Group("users")
 	routerUsers.POST("", s.GetHandler().Users().Create)
 	routerUsers.GET("", s.GetHandler().Users().FindAll)
-	routerUsers.GET("/:id", s.GetHandler().Users().FindOne)
-	routerUsers.POST("/:id", s.GetHandler().Users().Update)
-	routerUsers.DELETE("/:id", s.GetHandler().Users().Delete)
+	routerUsers.GET("/:id", s.GetHandler().Users().FindOneByID)
+	routerUsers.PUT("/:id", s.GetHandler().Users().UpdateByID)
+	routerUsers.DELETE("/:id", s.GetHandler().Users().DeleteByID)
 
 	routerTodos := s.http.Group("todos")
 	routerTodos.POST("", s.GetHandler().Todos().Create)

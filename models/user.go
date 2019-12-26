@@ -16,20 +16,33 @@ type User struct {
 	Email              string    `json:"email"`
 	Password           string    `json:"password"`
 	PasswordValidation string    `json:"password_validation"`
+	Image              string    `json:"image"`
 	Gender             string    `json:"gender"`
 	CountryCode        uint      `json:"country_code"`
+	CountryName        string    `json:"country_name"`
 	RoleID             uint      `json:"role_id"`
+	RoleName           string    `json:"role_name"`
 	CreatedAt          time.Time `json:"created_at"`
 	UpdatedAt          time.Time `json:"updated_at"`
 }
 
-// Validate model user
-func (u User) Validate() error {
+// ValidateCreate model user for create
+func (u User) ValidateCreate() error {
 	return validation.ValidateStruct(&u,
 		validation.Field(&u.FullName, validation.Required, validation.Length(5, 50)),
 		validation.Field(&u.Email, validation.Required, is.Email),
 		validation.Field(&u.Password, validation.Required, validation.Length(5, 50)),
 		validation.Field(&u.PasswordValidation, validation.Required, validation.In(u.Password)),
+		validation.Field(&u.Gender, validation.Required, validation.In("male", "female", "others", "wont_tell")),
+		validation.Field(&u.RoleID, validation.In(1, 2, 3)),
+	)
+}
+
+// ValidateUpdate model user for update
+func (u User) ValidateUpdate() error {
+	return validation.ValidateStruct(&u,
+		validation.Field(&u.FullName, validation.Required, validation.Length(5, 50)),
+		validation.Field(&u.Email, validation.Required, is.Email),
 		validation.Field(&u.Gender, validation.Required, validation.In("male", "female", "others", "wont_tell")),
 		validation.Field(&u.RoleID, validation.In(1, 2, 3)),
 	)

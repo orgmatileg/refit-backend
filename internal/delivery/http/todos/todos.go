@@ -4,18 +4,18 @@ import (
 	"github.com/labstack/echo"
 )
 
+// ITodos delivery http interface
 type ITodos interface {
 	Create(c echo.Context) error
-	FindOne(c echo.Context) error
+	FindOneByID(c echo.Context) error
 	FindAll(c echo.Context) error
-	Update(c echo.Context) error
-	Delete(c echo.Context) error
-	Count(c echo.Context) error
+	UpdateByID(c echo.Context) error
+	DeleteByID(c echo.Context) error
 }
 
 type todos struct{}
 
-// New Repository todos
+// New delivery http repository todos
 func New() ITodos {
 	return &todos{}
 }
@@ -23,18 +23,15 @@ func New() ITodos {
 func (u todos) Create(c echo.Context) error {
 	return nil
 }
-func (u todos) FindOne(c echo.Context) error {
+func (u todos) FindOneByID(c echo.Context) error {
 	return nil
 }
 func (u todos) FindAll(c echo.Context) error {
 	return nil
 }
-func (u todos) Update(c echo.Context) error {
+func (u todos) UpdateByID(c echo.Context) error {
 	return nil
 }
-func (u todos) Delete(c echo.Context) error {
-	return nil
-}
-func (u todos) Count(c echo.Context) error {
+func (u todos) DeleteByID(c echo.Context) error {
 	return nil
 }
