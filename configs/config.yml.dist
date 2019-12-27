@@ -1,0 +1,14 @@
+jwt:
+  secret: 
+
+mysql:
+  host: 
+  username: 
+  password: 
+  port: 3306
+
+mongo:
+  host: 
+  username: 
+  password: 
+  port: 27017

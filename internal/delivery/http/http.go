@@ -69,9 +69,9 @@ func (s *serverHTTP) InitRouter() {
 	routerTodos := s.http.Group("todos")
 	routerTodos.POST("", s.GetHandler().Todos().Create)
 	routerTodos.GET("", s.GetHandler().Todos().FindAll)
-	routerTodos.GET("/:id", s.GetHandler().Todos().FindOne)
-	routerTodos.POST("/:id", s.GetHandler().Todos().Update)
-	routerTodos.DELETE("/:id", s.GetHandler().Todos().Delete)
+	routerTodos.GET("/:id", s.GetHandler().Todos().FindOneByID)
+	routerTodos.POST("/:id", s.GetHandler().Todos().UpdateByID)
+	routerTodos.DELETE("/:id", s.GetHandler().Todos().DeleteByID)
 
 	routerBodyWeight := s.http.Group("bodyweights")
 	routerBodyWeight.POST("", s.GetHandler().BodyWeight().Create)
