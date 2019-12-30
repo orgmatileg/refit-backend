@@ -60,4 +60,6 @@ USER appuser
 # Expose port 1323
 EXPOSE 1323
 # Run the binary.
-ENTRYPOINT ["/go/bin/app","--config=./config.yml","serve"]
+# ENTRYPOINT ["/go/bin/app","--config=./config.yml","serve"]
+ENTRYPOINT ["/go/bin/app","serve"]
+
