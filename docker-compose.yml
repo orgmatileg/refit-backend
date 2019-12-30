@@ -1,16 +1,16 @@
 version: "3.7"
 services:
-  api:
+  backend:
     container_name: refit-backend
     build:
       context: .
       dockerfile: Dockerfile
     restart: always
     labels:
-      - traefik.http.routers.api.rule=Host(`refit-api.luqmanul.com`)
-      - traefik.http.services.api.loadbalancer.server.port=1323
-      - traefik.http.routers.api.entrypoints=web-secure
-      - traefik.http.routers.api.tls.certresolver=sample
+      - traefik.http.routers.backend.rule=Host(`refit-api.luqmanul.com`)
+      - traefik.http.services.backend.loadbalancer.server.port=1323
+      - traefik.http.routers.backend.entrypoints=web-secure
+      - traefik.http.routers.backend.tls.certresolver=sample
     networks:
       - traefiknet
 
