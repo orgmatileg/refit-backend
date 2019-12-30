@@ -1,18 +1,19 @@
 version: "3.7"
 services:
-  container_name: refit-backend
-  build:
-    context:
-    dockerfile: Dockerfile
-  restart: always
-  # volumes: []
-  labels:
-    - traefik.http.routers.ghost.rule=Host(`refit-api.luqmanul.com`)
-    - traefik.http.services.ghost.loadbalancer.server.port=1323
-    - traefik.http.routers.ghost.entrypoints=web-secure
-    - traefik.http.routers.ghost.tls.certresolver=sample
-  networks:
-    - traefiknet
+  api:
+    container_name: refit-backend
+    build:
+      context:
+      dockerfile: Dockerfile
+    restart: always
+    # volumes: []
+    labels:
+      - traefik.http.routers.ghost.rule=Host(`refit-api.luqmanul.com`)
+      - traefik.http.services.ghost.loadbalancer.server.port=1323
+      - traefik.http.routers.ghost.entrypoints=web-secure
+      - traefik.http.routers.ghost.tls.certresolver=sample
+    networks:
+      - traefiknet
 
 networks:
   traefiknet:
