@@ -64,7 +64,7 @@ func (u users) FindAll(c echo.Context) error {
 		ctx    = c.Request().Context()
 		limit  = "20"
 		offset = "0"
-		order  = "dsc"
+		order  = "desc"
 	)
 
 	if v := c.QueryParam("limit"); v != "" {

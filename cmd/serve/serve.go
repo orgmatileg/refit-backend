@@ -3,12 +3,15 @@ package serve
 import (
 	"context"
 	"database/sql"
-	"github.com/labstack/echo"
 	"log"
 	"os"
 	"os/signal"
 	"refit_backend/internal/delivery/http"
 	"refit_backend/internal/infrastructures/mysql"
+	"refit_backend/internal/infrastructures/s3"
+
+	"github.com/labstack/echo"
+
 	"refit_backend/internal/logger"
 	"refit_backend/internal/repository"
 	"time"
@@ -26,6 +29,7 @@ type IAppServe interface {
 	InitLogger()
 	InitMySQL()
 	InitHTTP()
+	InitS3()
 }
 
 // AppServe struct
@@ -49,6 +53,9 @@ func (a *appServe) GetDBMySQL() *sql.DB {
 	return a.mysql
 }
 
+func (a *appServe) InitS3() {
+	s3.Init()
+}
 func (a *appServe) InitLogger() {
 	// Init Logger
 	config := logger.Configuration{
@@ -93,6 +100,7 @@ func Start() {
 	app.InitLogger()
 	app.InitMySQL()
 	app.InitHTTP()
+	app.InitS3()
 
 	// Start server
 	go func() {

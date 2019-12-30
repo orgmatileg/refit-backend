@@ -123,7 +123,7 @@ func (u users) AuthLoginWithEmail(ctx context.Context, ru *models.User) (token s
 		switch {
 		case err == sql.ErrNoRows:
 			logger.Infof("could not find user by email: %s", err.Error())
-			return "", errors.New("email or password not exists")
+			return "", errors.New("email or password is wrong")
 		default:
 			logger.Infof("could not find user by email: %s", err.Error())
 			return "", err

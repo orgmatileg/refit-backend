@@ -1,5 +1,5 @@
 jwt:
-  secret: supersecret
+  secret: secret
 
 mysql:
   host: luqmanul.com
@@ -12,3 +12,21 @@ mongo:
   username: root
   password: masuk123
   port: 27017
+
+digital_ocean:
+  spaces:
+    key: HT5547EQ2X2YSMN3YHQK
+    secret: eYOalZJyyrbbWWpDsIHxKZdqvedHQe1U5WzemCw2t2I
+    endpoint: sgp1.digitaloceanspaces.com
+    bucket_name: static-luqmanul
+    ssl: true
+
+google:
+  oauth:
+    client_id: 829988646943-hsef4jve4b4l47l7c8rns8uj530r2dnj.apps.googleusercontent.com
+    secret: IswESNwmbTQPWYhvXqtfBl7_
+
+facebook:
+  oauth:
+    app_id: "598388744237064"
+    secret: 792dc3ea571216465f1e4742e8466267

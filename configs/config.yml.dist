@@ -12,3 +12,8 @@ mongo:
   username: 
   password: 
   port: 27017
+
+digital_ocean:
+  spaces: 
+    key: 
+    secret:
