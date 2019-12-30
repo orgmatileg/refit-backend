@@ -55,6 +55,8 @@ COPY --from=builder /etc/passwd /etc/passwd
 COPY --from=builder /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/ca-certificates.crt
 # Copy our static executable.
 COPY --from=builder /go/bin/app /go/bin/app
+COPY ./configs/config.yml /go/bin/config.yml
+
 # Use an unprivileged user.
 USER appuser
 # Expose port 1323
