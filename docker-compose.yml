@@ -3,7 +3,7 @@ services:
   api:
     container_name: refit-backend
     build:
-      context:
+      context: .
       dockerfile: Dockerfile
     restart: always
     # volumes: []
