@@ -3,6 +3,7 @@ package serve
 import (
 	"context"
 	"database/sql"
+	"fmt"
 	"log"
 	"os"
 	"os/signal"
@@ -11,6 +12,7 @@ import (
 	"refit_backend/internal/infrastructures/s3"
 
 	"github.com/labstack/echo"
+	"github.com/spf13/viper"
 
 	"refit_backend/internal/logger"
 	"refit_backend/internal/repository"
@@ -104,7 +106,7 @@ func Start() {
 
 	// Start server
 	go func() {
-		if err := app.GetHTTP().Start("0.0.0.0:1323"); err != nil {
+		if err := app.GetHTTP().Start(fmt.Sprintf("%s:%s", viper.GetString("app.baseurl"), viper.GetString("app.port"))); err != nil {
 			logger.Infof("could not start HTTP Server: %s", err.Error())
 		}
 	}()

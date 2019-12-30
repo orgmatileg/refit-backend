@@ -76,7 +76,7 @@ func (a auth) AuthRegister(c echo.Context) error {
 
 func (a auth) OAuthGoogleLogin(c echo.Context) error {
 	var googleOauthConfig = &oauth2.Config{
-		RedirectURL:  "http://192.168.43.2:1323/auth/google/callback",
+		RedirectURL:  "https://refit-api.luqmanul.com/auth/google/callback",
 		ClientID:     viper.GetString("google.oauth.client_id"),
 		ClientSecret: viper.GetString("google.oauth.secret"),
 		Scopes: []string{
@@ -123,7 +123,7 @@ func (a auth) OAuthGoogleCallback(c echo.Context) error {
 
 func (a auth) OAuthFacebookLogin(c echo.Context) error {
 	var facebookOauthConfig = &oauth2.Config{
-		RedirectURL:  "http://192.168.43.2:1323/auth/facebook/callback",
+		RedirectURL:  "https://refit-api.luqmanul.com/auth/facebook/callback",
 		ClientID:     viper.GetString("facebook.oauth.app_id"),
 		ClientSecret: viper.GetString("facebook.oauth.secret"),
 		Scopes: []string{

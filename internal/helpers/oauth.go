@@ -31,7 +31,7 @@ func GenerateStateOauthCookie() (string, http.Cookie) {
 func GetUserDataFromGoogle(code string) ([]byte, error) {
 
 	var googleOauthConfig = &oauth2.Config{
-		RedirectURL:  "http://localhost:1323/auth/google/callback",
+		RedirectURL:  "https://refit-api.luqmanul.com/auth/google/callback",
 		ClientID:     viper.GetString("google.oauth.client_id"),
 		ClientSecret: viper.GetString("google.oauth.secret"),
 		Scopes: []string{
@@ -63,7 +63,7 @@ func GetUserDataFromGoogle(code string) ([]byte, error) {
 func GetUserDataFromFacebook(code string) ([]byte, error) {
 
 	var facebookOAuthConfig = &oauth2.Config{
-		RedirectURL:  "http://localhost:1323/auth/facebook/callback",
+		RedirectURL:  "https://refit-api.luqmanul.com/auth/facebook/callback",
 		ClientID:     viper.GetString("facebook.oauth.app_id"),
 		ClientSecret: viper.GetString("facebook.oauth.secret"),
 		Scopes: []string{
@@ -95,7 +95,7 @@ func GetUserDataFromFacebook(code string) ([]byte, error) {
 func GetUserDataFromTwitter(code string) ([]byte, error) {
 
 	var facebookOAuthConfig = &oauth2.Config{
-		RedirectURL:  "http://localhost:1323/auth/twitter/callback",
+		RedirectURL:  "https://refit-api.luqmanul.com/auth/twitter/callback",
 		ClientID:     viper.GetString("twitter.oauth.app_id"),
 		ClientSecret: viper.GetString("twitter.oauth.secret"),
 		Scopes: []string{

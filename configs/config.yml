@@ -1,3 +1,7 @@
+app:
+  baseurl: "0.0.0.0"
+  port: 1323
+
 jwt:
   secret: secret
 
