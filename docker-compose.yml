@@ -8,10 +8,10 @@ services:
     restart: always
     # volumes: []
     labels:
-      - traefik.http.routers.ghost.rule=Host(`refit-api.luqmanul.com`)
-      - traefik.http.services.ghost.loadbalancer.server.port=1323
-      - traefik.http.routers.ghost.entrypoints=web-secure
-      - traefik.http.routers.ghost.tls.certresolver=sample
+      - traefik.http.routers.api.rule=Host(`refit-api.luqmanul.com`)
+      - traefik.http.services.api.loadbalancer.server.port=1323
+      - traefik.http.routers.api.entrypoints=web-secure
+      - traefik.http.routers.api.tls.certresolver=sample
     networks:
       - traefiknet
 
