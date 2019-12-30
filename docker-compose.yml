@@ -6,7 +6,6 @@ services:
       context: .
       dockerfile: Dockerfile
     restart: always
-    # volumes: []
     labels:
       - traefik.http.routers.api.rule=Host(`refit-api.luqmanul.com`)
       - traefik.http.services.api.loadbalancer.server.port=1323

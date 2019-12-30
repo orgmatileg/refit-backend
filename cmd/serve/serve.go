@@ -104,7 +104,7 @@ func Start() {
 
 	// Start server
 	go func() {
-		if err := app.GetHTTP().Start(":1323"); err != nil {
+		if err := app.GetHTTP().Start("0.0.0.0:1323"); err != nil {
 			logger.Infof("could not start HTTP Server: %s", err.Error())
 		}
 	}()

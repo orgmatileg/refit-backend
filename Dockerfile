@@ -37,7 +37,9 @@ RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -a -installsuffix cgo -o /go/
 RUN strip --strip-unneeded /go/bin/app
 # Compress binary with ultra brute mode, if you think this takes too long
 # Use --best instead
-RUN upx --ultra-brute /go/bin/app
+# RUN upx --ultra-brute /go/bin/app
+RUN upx --best /go/bin/app
+
 # Check if the binary not error after compressed with upx
 RUN upx -t /go/bin/app
 
