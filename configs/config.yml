@@ -2,6 +2,9 @@ app:
   baseurl: "0.0.0.0"
   port: 1323
 
+mobile:
+  deeplink: refit//
+
 jwt:
   secret: secret
 
