@@ -13,6 +13,7 @@ mysql:
   username: root
   password: masuk123
   port: 3306
+  dbname: refit
 
 mongo:
   host: mongo

@@ -2,11 +2,13 @@ package mysql
 
 import (
 	"database/sql"
+	"fmt"
 	"refit_backend/internal/logger"
 	"time"
 
 	// mysql need this
 	_ "github.com/go-sql-driver/mysql"
+	"github.com/spf13/viper"
 )
 
 var db *sql.DB
@@ -22,7 +24,15 @@ func GetDB() *sql.DB {
 
 // CreateConnection open new connection MySQL
 func createConnection() error {
-	dbCon, err := sql.Open("mysql", "root:masuk123@tcp(luqmanul.com:3306)/refit?parseTime=true")
+	dsn := fmt.Sprintf(
+		"%s:%s@tcp(%s:%s)/%s?parseTime=true",
+		viper.GetString("mysql.username"),
+		viper.GetString("mysql.password"),
+		viper.GetString("mysql.host"),
+		viper.GetString("mysql.port"),
+		viper.GetString("mysql.dbname"),
+	)
+	dbCon, err := sql.Open("mysql", dsn)
 	if err != nil {
 		logger.Errorf("could not open mysql database dsn: %s")
 		return err
