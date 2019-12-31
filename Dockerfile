@@ -21,8 +21,7 @@ RUN adduser -D -g '' appuser
 WORKDIR /app/
 
 # Copy depedencies
-COPY go.mod . 
-COPY go.sum .
+COPY go.mod go.sum ./
 
 # Get dependancies - will also be cached if we won't change mod/sum
 RUN go mod download

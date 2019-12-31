@@ -6,6 +6,8 @@ services:
       context: .
       dockerfile: Dockerfile
     restart: always
+    volumes:
+      - go-modules:/go/pkg/mod
     labels:
       - traefik.http.routers.backend.rule=Host(`refit-api.luqmanul.com`)
       - traefik.http.services.backend.loadbalancer.server.port=1323
@@ -17,3 +19,6 @@ services:
 networks:
   traefiknet:
     external: true
+
+volumes:
+  go-modules:
