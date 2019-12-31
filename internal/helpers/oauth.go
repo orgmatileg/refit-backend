@@ -42,6 +42,7 @@ func GetUserDataFromGoogle(code string) ([]byte, error) {
 		Endpoint: google.Endpoint,
 	}
 	// Use code to get token and get user info from Google.
+	// test
 
 	token, err := googleOauthConfig.Exchange(context.Background(), code)
 	if err != nil {
