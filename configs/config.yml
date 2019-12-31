@@ -9,7 +9,7 @@ jwt:
   secret: secret
 
 mysql:
-  host: mysql57
+  host: mysql
   username: root
   password: masuk123
   port: 3306
