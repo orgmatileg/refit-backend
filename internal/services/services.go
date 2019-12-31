@@ -4,7 +4,7 @@ import (
 	"refit_backend/internal/repository"
 	"refit_backend/internal/services/auth"
 	"refit_backend/internal/services/bodyweight"
-	"refit_backend/internal/services/todosth"
+	"refit_backend/internal/services/todos"
 	"refit_backend/internal/services/users"
 )
 
@@ -27,8 +27,11 @@ func New() IServices {
 	}
 }
 
-func (s services) Users() users.IUsers {
+func (s services) Auth() auth.IAuth {
+	return auth.New()
+}
 
+func (s services) Users() users.IUsers {
 	return users.New()
 }
 
