@@ -115,7 +115,7 @@ func (a auth) OAuthGoogleCallback(c echo.Context) error {
 	}
 	fmt.Println(data)
 
-	return c.Redirect(http.StatusTemporaryRedirect, "exp://192.168.43.2:19000/--/home?set_token=ggwp")
+	return c.Redirect(http.StatusTemporaryRedirect, "exp://192.168.43.2:19000/--/home?token=ggwp")
 
 	// GetOrCreate User in your db.
 	// Redirect or response with a token.
