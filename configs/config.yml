@@ -10,9 +10,9 @@ jwt:
 
 mysql:
   host: mysql
+  port: 3306
   username: root
   password: masuk123
-  port: 3306
   dbname: refit
 
 mongo:
