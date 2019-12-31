@@ -9,13 +9,13 @@ jwt:
   secret: secret
 
 mysql:
-  host: luqmanul.com
+  host: mysql57
   username: root
   password: masuk123
   port: 3306
 
 mongo:
-  host: luqmanul.com
+  host: mongo
   username: root
   password: masuk123
   port: 27017
