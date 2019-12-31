@@ -2,13 +2,15 @@ package services
 
 import (
 	"refit_backend/internal/repository"
+	"refit_backend/internal/services/auth"
 	"refit_backend/internal/services/bodyweight"
-	"refit_backend/internal/services/todos"
+	"refit_backend/internal/services/todosth"
 	"refit_backend/internal/services/users"
 )
 
 // IServices interface
 type IServices interface {
+	Auth() auth.IAuth
 	Users() users.IUsers
 	Todos() todos.ITodos
 	BodyWeight() bodyweight.IBodyWeight
