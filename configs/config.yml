@@ -27,8 +27,8 @@ digital_ocean:
 
 google:
   oauth:
-    client_id: 829988646943-hsef4jve4b4l47l7c8rns8uj530r2dnj.apps.googleusercontent.com
-    secret: IswESNwmbTQPWYhvXqtfBl7_
+    client_id: 829988646943-52ipm5mdrmhd0k04lj2evfn2fmu8omqf.apps.googleusercontent.com
+    secret: xH7sCzF5mxKJZDXCR3cM3shC
 
 facebook:
   oauth:
