@@ -1,6 +1,7 @@
 package auth
 
 import (
+	"fmt"
 	"log"
 	"net/http"
 	"refit_backend/internal/helpers"
@@ -118,20 +119,13 @@ func (a auth) OAuthGoogleCallback(c echo.Context) error {
 		return c.Redirect(http.StatusTemporaryRedirect, "luqmanul.com")
 	}
 
-	data, err := a.service.Auth().OAuthGoogleCallback(ctx, code)
+	token, err := a.service.Auth().OAuthGoogleCallback(ctx, code)
 	if err != nil {
 		// TODO: create static redirect page for failed oauth
 		return c.Redirect(http.StatusTemporaryRedirect, "luqmanul.com")
 	}
 
-	// return c.Redirect(http.StatusTemporaryRedirect, "exp://192.168.43.2:19000/--/home?set-token=ggwp")
-
-	// GetOrCreate User in your db.
-	// Redirect or response with a token.
-	// More code .....
-	// fmt.Fprintf(w, "UserInfo: %s\n", data)
-
-	return c.JSON(http.StatusOK, string(data))
+	return c.Redirect(http.StatusTemporaryRedirect, fmt.Sprintf("exp://192.168.43.2:19000/--/home?setToken=%s", token))
 }
 
 func (a auth) OAuthFacebookLogin(c echo.Context) error {
