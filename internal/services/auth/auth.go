@@ -51,10 +51,12 @@ func (a auth) OAuthGoogleCallback(ctx context.Context, code string) (tokenJWT st
 
 	if !exist {
 		userID, err := a.repository.Users().Create(ctx, &models.User{
-			Gender:   "others",
-			RoleID:   2,
-			FullName: m.Name,
-			Email:    m.Email,
+			Gender:    "others",
+			RoleID:    2,
+			FullName:  m.Name,
+			Email:     m.Email,
+			CreatedAt: time.Now(),
+			UpdatedAt: time.Now(),
 		})
 		if err != nil {
 			return "", err
