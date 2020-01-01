@@ -1,7 +1,6 @@
 package auth
 
 import (
-	"encoding/json"
 	"log"
 	"net/http"
 	"refit_backend/internal/helpers"
@@ -99,28 +98,30 @@ func (a auth) OAuthGoogleLogin(c echo.Context) error {
 
 func (a auth) OAuthGoogleCallback(c echo.Context) error {
 
+	var (
+		state = c.FormValue("state")
+		code  = c.FormValue("code")
+		ctx   = c.Request().Context()
+	)
+
 	// Read oauthState from Cookie
-	oauthState, _ := c.Cookie("oauthstate")
-
-	if c.FormValue("state") != oauthState.Value {
-		log.Println("invalid oauth google state")
-		c.Redirect(http.StatusTemporaryRedirect, "luqmanul.com")
-		return nil
+	oauthState, err := c.Cookie("oauthstate")
+	if err != nil {
+		// TODO: create static redirect page for failed oauth
+		logger.Infof("could not get cookie: %s", err.Error())
+		return c.Redirect(http.StatusTemporaryRedirect, "luqmanul.com")
 	}
 
-	data, err := helpers.GetUserDataFromGoogle(c.FormValue("code"))
-	if err != nil {
-		log.Println(err.Error())
-		c.Redirect(http.StatusTemporaryRedirect, "luqmanul.com")
-		return nil
+	if state != oauthState.Value {
+		// TODO: create static redirect page for failed oauth
+		logger.Infof("oauth google state not equal")
+		return c.Redirect(http.StatusTemporaryRedirect, "luqmanul.com")
 	}
 
-	resData := struct {
-	}{}
-
-	err = json.Unmarshal(data, &resData)
+	data, err := a.service.Auth().OAuthGoogleCallback(ctx, code)
 	if err != nil {
-		logger.Infof("")
+		// TODO: create static redirect page for failed oauth
+		return c.Redirect(http.StatusTemporaryRedirect, "luqmanul.com")
 	}
 
 	// return c.Redirect(http.StatusTemporaryRedirect, "exp://192.168.43.2:19000/--/home?set-token=ggwp")

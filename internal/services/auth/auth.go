@@ -2,14 +2,10 @@ package auth
 
 import (
 	"context"
-	"database/sql"
-	"errors"
-	"refit_backend/internal/logger"
+	"fmt"
+	"refit_backend/internal/helpers"
 	"refit_backend/internal/repository"
-	"refit_backend/models"
 	"regexp"
-
-	validation "github.com/go-ozzo/ozzo-validation/v3"
 )
 
 var (
@@ -18,7 +14,7 @@ var (
 
 // IAuth interface
 type IAuth interface {
-	FindOneByID(ctx context.Context, userID string) (mu *models.User, err error)
+	OAuthGoogleCallback(ctx context.Context, code string) (tokenJWT string, err error)
 }
 
 type auth struct {
@@ -33,27 +29,24 @@ func New() IAuth {
 }
 
 // FindOneByID services users
-func (u auth) FindOneByID(ctx context.Context, userID string) (mu *models.User, err error) {
-
-	err = validation.Validate(userID, validation.Match(regexNumberOnly))
+func (a auth) OAuthGoogleCallback(ctx context.Context, code string) (tokenJWT string, err error) {
+	m, err := a.repository.Auth().GetUserDataFromGoogle(ctx, helpers.GetOAuthGoogleConfig(), code)
 	if err != nil {
-		logger.Infof("could not validate: %s", err.Error())
-		return nil, errors.New("invalid userID param, should be number only")
+		return "", err
 	}
-	mu, err = u.repository.Users().FindOneByID(ctx, userID)
-	if err != nil {
-		switch {
-		case err == sql.ErrNoRows:
-			logger.Infof("could not find user by id: %s", err.Error())
-			return nil, errors.New("userID not exists")
-		default:
-			logger.Infof("could not find user by id: %s", err.Error())
-			return nil, err
-		}
-	}
+	fmt.Println(m)
+	// mu := models.User{
+	// 	FullName: m.Name,
+	// 	Email:    m.Email,
+	// 	RoleID:   2,
+	// }
 
-	// Remove sensitive data
-	mu.Password = ""
+	// fmt.Println(mu)
 
-	return mu, nil
+	// userID, err := a.repository.Users().Create(ctx, &mu)
+	// if err != nil {
+	// 	return "", err
+	// }
+
+	return tokenJWT, nil
 }

@@ -2,6 +2,7 @@ package auth
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"io/ioutil"
 	"net/http"
@@ -13,7 +14,7 @@ import (
 
 // IAuth repository interface
 type IAuth interface {
-	GetUserDataFromGoogle(ctx context.Context, userID string) (mu *models.User, err error)
+	GetUserDataFromGoogle(ctx context.Context, oauthConfig *oauth2.Config, code string) (m *models.GoogleOAuthUserInfo, err error)
 }
 
 type auth struct{}
@@ -24,7 +25,7 @@ func New() IAuth {
 }
 
 // GetUserDataFromGoogle repository users
-func (u auth) GetUserDataFromGoogle(ctx context.Context, oauthConfig *oauth2.Config, code string) (mu *models.User, err error) {
+func (u auth) GetUserDataFromGoogle(ctx context.Context, oauthConfig *oauth2.Config, code string) (m *models.GoogleOAuthUserInfo, err error) {
 
 	token, err := oauthConfig.Exchange(ctx, code)
 	if err != nil {
@@ -37,12 +38,15 @@ func (u auth) GetUserDataFromGoogle(ctx context.Context, oauthConfig *oauth2.Con
 		return nil, err
 	}
 	defer response.Body.Close()
-	contents, err := ioutil.ReadAll(response.Body)
+	resBody, err := ioutil.ReadAll(response.Body)
 	if err != nil {
 		logger.Infof("could not read body from response google: %s", err.Error())
 		return nil, fmt.Errorf("failed read response: %s", err.Error())
 	}
-	fmt.Println(contents)
-	// return contents, nil
-	return
+	err = json.Unmarshal(resBody, &m)
+	if err != nil {
+		logger.Infof("could not json unmarshall response from google: %s", err.Error())
+		return nil, err
+	}
+	return m, nil
 }

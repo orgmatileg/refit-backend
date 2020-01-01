@@ -1,0 +1,40 @@
+app:
+  baseurl: "0.0.0.0"
+  port: 1323
+
+mobile:
+  deeplink: refit//
+
+jwt:
+  secret: secret
+
+mysql:
+  host: luqmanul.com
+  port: 3306
+  username: root
+  password: masuk123
+  dbname: refit
+
+mongo:
+  host: mongo
+  username: root
+  password: masuk123
+  port: 27017
+
+digital_ocean:
+  spaces:
+    key: HT5547EQ2X2YSMN3YHQK
+    secret: eYOalZJyyrbbWWpDsIHxKZdqvedHQe1U5WzemCw2t2I
+    endpoint: sgp1.digitaloceanspaces.com
+    bucket_name: static-luqmanul
+    ssl: true
+
+google:
+  oauth:
+    client_id: 829988646943-52ipm5mdrmhd0k04lj2evfn2fmu8omqf.apps.googleusercontent.com
+    secret: xH7sCzF5mxKJZDXCR3cM3shC
+
+facebook:
+  oauth:
+    app_id: "598388744237064"
+    secret: 792dc3ea571216465f1e4742e8466267

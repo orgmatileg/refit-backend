@@ -15,6 +15,21 @@ import (
 	"golang.org/x/oauth2/google"
 )
 
+// GetOAuthGoogleConfig ...
+func GetOAuthGoogleConfig() *oauth2.Config {
+	return &oauth2.Config{
+		RedirectURL:  "https://refit-api.luqmanul.com/auth/google/callback",
+		ClientID:     viper.GetString("google.oauth.client_id"),
+		ClientSecret: viper.GetString("google.oauth.secret"),
+		Scopes: []string{
+			"https://www.googleapis.com/auth/userinfo.email",
+			"https://www.googleapis.com/auth/userinfo.profile",
+			"https://www.googleapis.com/auth/plus.me",
+		},
+		Endpoint: google.Endpoint,
+	}
+}
+
 // GenerateStateOauthCookie generate cookie for oauth
 func GenerateStateOauthCookie() (string, http.Cookie) {
 	var expiration = time.Now().Add(365 * 24 * time.Hour)
