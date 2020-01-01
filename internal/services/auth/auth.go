@@ -2,9 +2,9 @@ package auth
 
 import (
 	"context"
-	"fmt"
 	"refit_backend/internal/helpers"
 	"refit_backend/internal/repository"
+	"refit_backend/models"
 	"regexp"
 )
 
@@ -34,19 +34,33 @@ func (a auth) OAuthGoogleCallback(ctx context.Context, code string) (tokenJWT st
 	if err != nil {
 		return "", err
 	}
-	fmt.Println(m)
-	// mu := models.User{
-	// 	FullName: m.Name,
-	// 	Email:    m.Email,
-	// 	RoleID:   2,
-	// }
 
-	// fmt.Println(mu)
+	mo := models.OAuth{
+		OpenID:  m.OpenID,
+		Service: "google",
+	}
 
-	// userID, err := a.repository.Users().Create(ctx, &mu)
-	// if err != nil {
-	// 	return "", err
-	// }
+	exist, _, err := a.repository.Users().IsExistsOAuth(ctx, &mo)
+	if err != nil {
+		return "", err
+	}
+
+	if !exist {
+		userID, err := a.repository.Users().Create(ctx, &models.User{
+			Gender:   "others",
+			RoleID:   2,
+			FullName: m.Name,
+			Email:    m.Email,
+		})
+		if err != nil {
+			return "", err
+		}
+		mo.UserID = userID
+		_, err = a.repository.Users().StoreOAuth(ctx, &mo)
+		if err != nil {
+			return "", err
+		}
+	}
 
 	return tokenJWT, nil
 }

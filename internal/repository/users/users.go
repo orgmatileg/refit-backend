@@ -2,6 +2,7 @@ package users
 
 import (
 	"context"
+	"database/sql"
 	"fmt"
 	"refit_backend/internal/infrastructures/mysql"
 	"refit_backend/internal/logger"
@@ -20,6 +21,8 @@ type IUsers interface {
 	UpdateByID(ctx context.Context, m *models.User, userID string) (rowUpdated int64, err error)
 	DeleteByID(ctx context.Context, userID string) (rowDeleted int64, err error)
 	Count(ctx context.Context) (count uint, err error)
+	StoreOAuth(ctx context.Context, m *models.OAuth) (userOAuthID uint, err error)
+	IsExistsOAuth(ctx context.Context, m *models.OAuth) (isExists bool, OAuthID uint, err error)
 }
 
 type users struct{}
@@ -258,4 +261,50 @@ func (u users) Count(ctx context.Context) (count uint, err error) {
 		return 0, err
 	}
 	return count, nil
+}
+
+func (u users) StoreOAuth(ctx context.Context, m *models.OAuth) (userOAuthID uint, err error) {
+	q := `
+		INSERT INTO user_oauth
+		(service, open_id, user_id, token, token_secret)
+		VALUES (?, ?, ?, ?, ?)
+	`
+
+	res, err := mysql.GetDB().ExecContext(ctx, q,
+		m.Service,
+		m.OpenID,
+		m.UserID,
+		m.Token,
+		m.TokenSecret,
+	)
+	if err != nil {
+		logger.Infof("could not exec query: %s", err.Error())
+		return 0, err
+	}
+
+	lastInsertedID, err := res.LastInsertId()
+	if err != nil {
+		logger.Infof("could not get result query last insert id: %s", err.Error())
+		return 0, err
+	}
+
+	return uint(lastInsertedID), nil
+}
+
+func (u users) IsExistsOAuth(ctx context.Context, m *models.OAuth) (isExists bool, OAuthID uint, err error) {
+	q := `
+		SELECT id
+		FROM user_oauth
+		WHERE service = ? AND open_id = ?
+	`
+	err = mysql.GetDB().QueryRowContext(ctx, q).Scan(&OAuthID)
+	if err != nil && err != sql.ErrNoRows {
+		return false, 0, err
+	}
+	if OAuthID > 0 {
+		return true, OAuthID, nil
+	} else {
+		return false, 0, nil
+	}
+
 }
