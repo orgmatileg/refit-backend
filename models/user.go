@@ -18,8 +18,6 @@ type User struct {
 	PasswordValidation string    `json:"password_validation"`
 	Image              string    `json:"image"`
 	Gender             string    `json:"gender"`
-	CountryCode        uint      `json:"country_code"`
-	CountryName        string    `json:"country_name"`
 	RoleID             uint      `json:"role_id"`
 	RoleName           string    `json:"role_name"`
 	CreatedAt          time.Time `json:"created_at"`

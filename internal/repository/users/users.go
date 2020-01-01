@@ -35,11 +35,10 @@ func New() IUsers {
 // FindOneByID repository users
 func (u users) FindOneByID(ctx context.Context, userID string) (mu *models.User, err error) {
 	q := `
-		SELECT user.id, full_name, email, password, gender, country_code, country.name as country_name, role_id, role.name as role_name, user_image.image, user.created_at, updated_at 
+		SELECT user.id, full_name, email, password, gender, role_id, role.name as role_name, user_image.image, user.created_at, user.updated_at 
 		FROM user
 		INNER JOIN user_image on user.id = user_image.user_id
 		INNER JOIN role on user.role_id = role.id
-		INNER JOIN country on user.country_code = country.code
 		WHERE user.id = ?
 	`
 
@@ -50,8 +49,6 @@ func (u users) FindOneByID(ctx context.Context, userID string) (mu *models.User,
 		&mu.Email,
 		&mu.Password,
 		&mu.Gender,
-		&mu.CountryCode,
-		&mu.CountryName,
 		&mu.RoleID,
 		&mu.RoleName,
 		&mu.Image,
@@ -69,8 +66,8 @@ func (u users) Create(ctx context.Context, m *models.User) (userID uint, err err
 
 	q := `
 		INSERT INTO user
-		(full_name, email, password, gender, country_code, role_id, created_at, updated_at)
-		VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+		(full_name, email, password, gender, role_id, created_at, updated_at)
+		VALUES (?, ?, ?, ?, ?, ?, ?)
 	`
 
 	db := mysql.GetDB()
@@ -102,22 +99,11 @@ func (u users) Create(ctx context.Context, m *models.User) (userID uint, err err
 		}
 	}()
 
-	// TODO: REFACTOR THIS FUCKING NULL VALUE
-	countryCode := sql.NullInt32{}
-	if m.CountryCode == 0 {
-		countryCode.Valid = false
-	} else {
-		countryCode.Int32 = int32(m.CountryCode)
-		countryCode.Valid = true
-
-	}
-
 	res, err := tx.ExecContext(ctx, q,
 		m.FullName,
 		m.Email,
 		m.Password,
 		m.Gender,
-		countryCode, // TODO: REFACTOR THIS FUCKING NULL VALUE
 		m.RoleID,
 		m.CreatedAt,
 		m.UpdatedAt,
@@ -152,7 +138,7 @@ func (u users) Create(ctx context.Context, m *models.User) (userID uint, err err
 // FindOneByEmail repository users
 func (u users) FindOneByEmail(ctx context.Context, email string) (*models.User, error) {
 	q := `
-		SELECT id, full_name, email, password, gender, country_code, role_id, created_at, updated_at
+		SELECT id, full_name, email, password, gender, role_id, created_at, updated_at
 		FROM user 
 		WHERE email = ?
 	`
@@ -163,7 +149,6 @@ func (u users) FindOneByEmail(ctx context.Context, email string) (*models.User, 
 		&mu.Email,
 		&mu.Password,
 		&mu.Gender,
-		&mu.CountryCode,
 		&mu.RoleID,
 		&mu.CreatedAt,
 		&mu.UpdatedAt,
@@ -177,11 +162,10 @@ func (u users) FindOneByEmail(ctx context.Context, email string) (*models.User, 
 // FindAll repository users
 func (u users) FindAll(ctx context.Context, limit, offset, order string) (lmu []*models.User, err error) {
 	q := fmt.Sprintf(`
-	SELECT user.id, full_name, email, password, gender, country_code, country.name as country_name, role_id, role.name as role_name, user_image.image, user.created_at, updated_at 
+	SELECT user.id, full_name, email, password, gender, role_id, role.name as role_name, user_image.image, user.created_at, updated_at 
 	FROM user
 	INNER JOIN user_image on user.id = user_image.user_id
 	INNER JOIN role on user.role_id = role.id
-	INNER JOIN country on user.country_code = country.code
 	ORDER BY user.created_at %s LIMIT ? OFFSET ?
 `, order)
 
@@ -203,8 +187,6 @@ func (u users) FindAll(ctx context.Context, limit, offset, order string) (lmu []
 			&tmu.Email,
 			&tmu.Password,
 			&tmu.Gender,
-			&tmu.CountryCode,
-			&tmu.CountryName,
 			&tmu.RoleID,
 			&tmu.RoleName,
 			&tmu.Image,
@@ -224,13 +206,12 @@ func (u users) FindAll(ctx context.Context, limit, offset, order string) (lmu []
 func (u users) UpdateByID(ctx context.Context, m *models.User, userID string) (rowUpdated int64, err error) {
 	q := `
 		UPDATE user
-		SET full_name=?, gender=?, country_code=?
+		SET full_name=?, gender=?
 		WHERE id=? 
 	`
 	res, err := mysql.GetDB().ExecContext(ctx, q,
 		m.FullName,
 		m.Gender,
-		m.CountryCode,
 		userID,
 	)
 	if err != nil {
