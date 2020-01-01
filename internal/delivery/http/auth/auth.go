@@ -122,6 +122,7 @@ func (a auth) OAuthGoogleCallback(c echo.Context) error {
 	token, err := a.service.Auth().OAuthGoogleCallback(ctx, code)
 	if err != nil {
 		// TODO: create static redirect page for failed oauth
+		logger.Infof("could not handle service callback: %s", err.Error())
 		return c.Redirect(http.StatusTemporaryRedirect, "luqmanul.com")
 	}
 
