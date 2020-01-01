@@ -3,9 +3,13 @@ package auth
 import (
 	"context"
 	"refit_backend/internal/helpers"
+	"refit_backend/internal/logger"
 	"refit_backend/internal/repository"
 	"refit_backend/models"
 	"regexp"
+	"time"
+
+	"github.com/dgrijalva/jwt-go"
 )
 
 var (
@@ -60,6 +64,21 @@ func (a auth) OAuthGoogleCallback(ctx context.Context, code string) (tokenJWT st
 		if err != nil {
 			return "", err
 		}
+	}
+
+	claims := helpers.JWTPayload{
+		StandardClaims: &jwt.StandardClaims{
+			Audience:  "MOBILE",
+			Issuer:    "Luqmanul Hakim API",
+			IssuedAt:  time.Now().Unix(),
+			ExpiresAt: time.Now().Add(time.Minute * time.Duration(1440)).Unix(),
+		},
+	}
+
+	tokenJWT, err = helpers.GetJWTTokenGenerator().GenerateToken(claims)
+	if err != nil {
+		logger.Infof("could not generate token: %s", err.Error())
+		return "", err
 	}
 
 	return tokenJWT, nil
