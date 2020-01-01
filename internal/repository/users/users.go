@@ -297,7 +297,10 @@ func (u users) IsExistsOAuth(ctx context.Context, m *models.OAuth) (isExists boo
 		FROM user_oauth
 		WHERE service = ? AND open_id = ?
 	`
-	err = mysql.GetDB().QueryRowContext(ctx, q).Scan(&OAuthID)
+	err = mysql.GetDB().QueryRowContext(ctx, q,
+		m.Service,
+		m.OpenID,
+	).Scan(&OAuthID)
 	if err != nil && err != sql.ErrNoRows {
 		return false, 0, err
 	}
