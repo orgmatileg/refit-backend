@@ -102,12 +102,22 @@ func (u users) Create(ctx context.Context, m *models.User) (userID uint, err err
 		}
 	}()
 
+	// TODO: REFACTOR THIS FUCKING NULL VALUE
+	countryCode := sql.NullInt32{}
+	if m.CountryCode == 0 {
+		countryCode.Valid = false
+	} else {
+		countryCode.Int32 = int32(m.CountryCode)
+		countryCode.Valid = true
+
+	}
+
 	res, err := tx.ExecContext(ctx, q,
 		m.FullName,
 		m.Email,
 		m.Password,
 		m.Gender,
-		m.CountryCode,
+		countryCode, // TODO: REFACTOR THIS FUCKING NULL VALUE
 		m.RoleID,
 		m.CreatedAt,
 		m.UpdatedAt,
