@@ -195,12 +195,10 @@ func (a auth) OAuthTwitterCallback(c echo.Context) error {
 		m[datas[0]] = datas[1]
 	}
 
-	oauthWithToken := oauth1.NewToken(m["oauth_token"], m["oauth_token_secret"])
+	token := oauth1.NewToken(m["oauth_token"], m["oauth_token_secret"])
 	config := oauth1.NewConfig(ConsumerKey, ConsumerSecret)
-	httpClient := config.Client(context.Background(), oauthWithToken)
-
-	path := "https://api.twitter.com/1.1/statuses/home_timeline.json?count=2"
-	resp, err = httpClient.Get(path)
+	httpClient := config.Client(context.Background(), token)
+	resp, err = httpClient.Get("https://api.twitter.com/1.1/account/verify_credentials.json?include_email=true")
 	if err != nil {
 		logger.Infof("%s", err.Error())
 	}
@@ -213,7 +211,7 @@ func (a auth) OAuthTwitterCallback(c echo.Context) error {
 	return c.String(200, string(b)+string(body))
 
 	////////////
-	// req, err = http.NewRequest("GET", "https://api.twitter.com/1.1/account/verify_credentials.json?include_email=true", nil)
+	// req, err = http.NewRequest("GET", "", nil)
 	// if err != nil {
 	// 	logger.Infof("%s", err.Error())
 	// }
