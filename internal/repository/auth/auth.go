@@ -16,6 +16,7 @@ import (
 type IAuth interface {
 	GetUserDataFromGoogle(ctx context.Context, oauthConfig *oauth2.Config, code string) (m *models.GoogleOAuthUserInfo, err error)
 	GetUserDataFromFacebook(ctx context.Context, oauthConfig *oauth2.Config, code string) (m *models.FacebookOAuthUserInfo, err error)
+	GetUserDataFromTwitter(c *http.Client) (m *models.TwitterOAuthUserInfo, err error)
 }
 
 type auth struct{}
@@ -75,6 +76,24 @@ func (u auth) GetUserDataFromFacebook(ctx context.Context, oauthConfig *oauth2.C
 	if err != nil {
 		logger.Infof("could not json unmarshall response from facebook: %s", err.Error())
 		return nil, err
+	}
+	return m, nil
+}
+
+// GetUserDataFromGoogle repository users
+func (u auth) GetUserDataFromTwitter(c *http.Client) (m *models.TwitterOAuthUserInfo, err error) {
+	resp, err := c.Get("https://api.twitter.com/1.1/account/verify_credentials.json?include_email=true")
+	if err != nil {
+		logger.Infof("%s", err.Error())
+	}
+	defer resp.Body.Close()
+	body, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		logger.Infof("%s", err.Error())
+	}
+	err = json.Unmarshal(body, &m)
+	if err != nil {
+		logger.Infof("%s", err.Error())
 	}
 	return m, nil
 }

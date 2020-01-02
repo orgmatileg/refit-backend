@@ -1,20 +1,17 @@
 package auth
 
 import (
-	"context"
 	"fmt"
-	"github.com/dghubble/oauth1"
-	"github.com/kkdai/twitter"
-	"github.com/labstack/echo"
-	"github.com/spf13/viper"
-	"io/ioutil"
 	"net/http"
 	"refit_backend/internal/constants"
 	"refit_backend/internal/helpers"
 	"refit_backend/internal/logger"
 	"refit_backend/internal/services"
 	"refit_backend/models"
-	"strings"
+
+	"github.com/kkdai/twitter"
+	"github.com/labstack/echo"
+	"github.com/spf13/viper"
 )
 
 // IAuth interface
@@ -161,87 +158,17 @@ func (a auth) OAuthTwitterLogin(c echo.Context) error {
 
 func (a auth) OAuthTwitterCallback(c echo.Context) error {
 	var (
-		ConsumerKey      = viper.GetString("twitter.consumer_api_key")
-		ConsumerSecret   = viper.GetString("twitter.consumer_api_secret")
-		verificationCode = c.QueryParam("oauth_verifier")
 		tokenKey         = c.QueryParam("oauth_token")
+		verificationCode = c.QueryParam("oauth_verifier")
+		ctx              = c.Request().Context()
 	)
 
-	req, err := http.NewRequest("POST", "https://api.twitter.com/oauth/access_token", nil)
+	token, err := a.service.Auth().OAuthTwitterCallback(ctx, tokenKey, verificationCode)
 	if err != nil {
-		logger.Infof("%s", err.Error())
-	}
-	req.Header.Add("Content-Type", "application/json")
-	q := req.URL.Query()
-	q.Add("oauth_token", tokenKey)
-	q.Add("oauth_verifier", verificationCode)
-	req.URL.RawQuery = q.Encode()
-
-	client := &http.Client{}
-	resp, err := client.Do(req)
-	if err != nil {
-		logger.Infof("%s", err.Error())
-	}
-	defer resp.Body.Close()
-	b, err := ioutil.ReadAll(resp.Body)
-	if err != nil {
-		logger.Infof("%s", err.Error())
+		logger.Infof("could not handle service callback: %s", err.Error())
+		return c.Redirect(http.StatusTemporaryRedirect, constants.RedirectFailOAuth)
 	}
 
-	resSlice := strings.Split(string(b), "&")
-	m := make(map[string]string)
-	for _, v := range resSlice {
-		datas := strings.Split(v, "=")
-		m[datas[0]] = datas[1]
-	}
-
-	token := oauth1.NewToken(m["oauth_token"], m["oauth_token_secret"])
-	config := oauth1.NewConfig(ConsumerKey, ConsumerSecret)
-	httpClient := config.Client(context.Background(), token)
-	resp, err = httpClient.Get("https://api.twitter.com/1.1/account/verify_credentials.json?include_email=true")
-	if err != nil {
-		logger.Infof("%s", err.Error())
-	}
-	defer resp.Body.Close()
-	body, err := ioutil.ReadAll(resp.Body)
-	if err != nil {
-		logger.Infof("%s", err.Error())
-	}
-	fmt.Printf("Raw Response Body:\n%v\n", string(body))
-	return c.String(200, string(b)+string(body))
-
-	////////////
-	// req, err = http.NewRequest("GET", "", nil)
-	// if err != nil {
-	// 	logger.Infof("%s", err.Error())
-	// }
-	// req.Header.Add("Content-Type", "application/json")
-	// q = req.URL.Query()
-	// q.Add("oauth_consumer_key", ConsumerKey)
-	// q.Add("oauth_token")
-	// req.URL.RawQuery = q.Encode()
-	// client = &http.Client{}
-	// resp, err = client.Do(req)
-	// if err != nil {
-	// 	logger.Infof("%s", err.Error())
-	// }
-	// b, err = ioutil.ReadAll(resp.Body)
-	// if err != nil {
-	// 	logger.Infof("%s", err.Error())
-	// }
-	// defer resp.Body.Close()
-
-	// return c.String(200, string(b))
-
-	// timelineURL := fmt.Sprintf("http://%s/time", r.Host)
-	// return c.Redirect(http.StatusTemporaryRedirect, timelineURL)
-
-	// token, err := a.service.Auth().OAuthFacebookCallback(ctx, code)
-	// if err != nil {
-	// 	logger.Infof("could not handle service callback: %s", err.Error())
-	// 	return c.Redirect(http.StatusTemporaryRedirect, constants.RedirectFailOAuth)
-	// }
-
-	// return c.Redirect(http.StatusTemporaryRedirect, fmt.Sprintf("exp://192.168.43.2:19000/--/home?setToken=%s", "token"))
+	return c.Redirect(http.StatusTemporaryRedirect, fmt.Sprintf("exp://192.168.43.2:19000/--/home?setToken=%s", token))
 
 }
