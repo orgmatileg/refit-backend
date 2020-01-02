@@ -1,7 +1,9 @@
 package auth
 
 import (
+	"context"
 	"fmt"
+	"github.com/dghubble/oauth1"
 	"github.com/kkdai/twitter"
 	"github.com/labstack/echo"
 	"github.com/spf13/viper"
@@ -159,13 +161,12 @@ func (a auth) OAuthTwitterLogin(c echo.Context) error {
 
 func (a auth) OAuthTwitterCallback(c echo.Context) error {
 	var (
-		ConsumerKey = viper.GetString("twitter.consumer_api_key")
-		// ConsumerSecret   = viper.GetString("twitter.consumer_api_secret")
+		ConsumerKey      = viper.GetString("twitter.consumer_api_key")
+		ConsumerSecret   = viper.GetString("twitter.consumer_api_secret")
 		verificationCode = c.QueryParam("oauth_verifier")
 		tokenKey         = c.QueryParam("oauth_token")
 	)
 
-	// authorization: OAuth oauth_consumer_key="CONSUMER_API_KEY", oauth_nonce="OAUTH_NONCE", oauth_signature="OAUTH_SIGNATURE", oauth_signature_method="HMAC-SHA1", oauth_timestamp="OAUTH_TIMESTAMP", oauth_token="ACCESS_TOKEN", oauth_version="1.0"
 	req, err := http.NewRequest("POST", "https://api.twitter.com/oauth/access_token", nil)
 	if err != nil {
 		logger.Infof("%s", err.Error())
@@ -194,28 +195,33 @@ func (a auth) OAuthTwitterCallback(c echo.Context) error {
 		m[datas[0]] = datas[1]
 	}
 
-	////////////
-	req, err = http.NewRequest("GET", "https://api.twitter.com/1.1/account/verify_credentials.json?include_email=true", nil)
-	if err != nil {
-		logger.Infof("%s", err.Error())
-	}
-	req.Header.Add("Content-Type", "application/json")
-	q = req.URL.Query()
-	q.Add("oauth_consumer_key", ConsumerKey)
-	q.Add("oauth_token", m["oauth_token"])
-	req.URL.RawQuery = q.Encode()
-	client = &http.Client{}
-	resp, err = client.Do(req)
-	if err != nil {
-		logger.Infof("%s", err.Error())
-	}
-	b, err = ioutil.ReadAll(resp.Body)
-	if err != nil {
-		logger.Infof("%s", err.Error())
-	}
-	defer resp.Body.Close()
-
+	oauthWithToken := oauth1.NewToken(m["oauth_token"], m["oauth_token_secret"])
+	config := oauth1.NewConfig(ConsumerKey, ConsumerSecret)
+	config.Client(context.Background(), oauthWithToken)
 	return c.String(200, string(b))
+
+	////////////
+	// req, err = http.NewRequest("GET", "https://api.twitter.com/1.1/account/verify_credentials.json?include_email=true", nil)
+	// if err != nil {
+	// 	logger.Infof("%s", err.Error())
+	// }
+	// req.Header.Add("Content-Type", "application/json")
+	// q = req.URL.Query()
+	// q.Add("oauth_consumer_key", ConsumerKey)
+	// q.Add("oauth_token")
+	// req.URL.RawQuery = q.Encode()
+	// client = &http.Client{}
+	// resp, err = client.Do(req)
+	// if err != nil {
+	// 	logger.Infof("%s", err.Error())
+	// }
+	// b, err = ioutil.ReadAll(resp.Body)
+	// if err != nil {
+	// 	logger.Infof("%s", err.Error())
+	// }
+	// defer resp.Body.Close()
+
+	// return c.String(200, string(b))
 
 	// timelineURL := fmt.Sprintf("http://%s/time", r.Host)
 	// return c.Redirect(http.StatusTemporaryRedirect, timelineURL)

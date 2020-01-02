@@ -4,6 +4,7 @@ go 1.13
 
 require (
 	github.com/asaskevich/govalidator v0.0.0-20190424111038-f61b66f89f4a // indirect
+	github.com/dghubble/oauth1 v0.6.0
 	github.com/dgrijalva/jwt-go v3.2.0+incompatible
 	github.com/go-ini/ini v1.51.1 // indirect
 	github.com/go-ozzo/ozzo-validation v3.6.0+incompatible
