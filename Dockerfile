@@ -55,6 +55,8 @@ COPY --from=builder /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/ca-certifi
 # Copy our static executable.
 COPY --from=builder /go/bin/app /go/bin/app
 COPY ./configs/config.yml /go/bin/config.yml
+COPY ./static /go/bin/static
+
 
 # Use an unprivileged user.
 USER appuser

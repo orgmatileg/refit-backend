@@ -60,7 +60,9 @@ func (a auth) OAuthGoogleCallback(ctx context.Context, code string) (tokenJWT st
 	if !exist {
 
 		mu, err := a.repository.Users().FindOneByEmail(ctx, m.Email)
-		if err != nil && err == sql.ErrNoRows {
+		if err == nil {
+			mo.UserID = mu.ID
+		} else if err != nil && err == sql.ErrNoRows {
 			userID, err := a.repository.Users().Create(ctx, &models.User{
 				Gender:    "others",
 				RoleID:    2,
@@ -70,12 +72,10 @@ func (a auth) OAuthGoogleCallback(ctx context.Context, code string) (tokenJWT st
 				UpdatedAt: time.Now(),
 			})
 			if err != nil {
+				logger.Infof("%s", err.Error())
 				return "", err
 			}
 			mo.UserID = userID
-
-		} else if err != nil {
-			mo.UserID = mu.ID
 
 		} else {
 			logger.Infof("%s", err.Error())
@@ -124,7 +124,9 @@ func (a auth) OAuthFacebookCallback(ctx context.Context, code string) (tokenJWT 
 
 	if !exist {
 		mu, err := a.repository.Users().FindOneByEmail(ctx, m.Email)
-		if err != nil && err == sql.ErrNoRows {
+		if err == nil {
+			mo.UserID = mu.ID
+		} else if err != nil && err == sql.ErrNoRows {
 			userID, err := a.repository.Users().Create(ctx, &models.User{
 				Gender:    "others",
 				RoleID:    2,
@@ -134,12 +136,10 @@ func (a auth) OAuthFacebookCallback(ctx context.Context, code string) (tokenJWT 
 				UpdatedAt: time.Now(),
 			})
 			if err != nil {
+				logger.Infof("%s", err.Error())
 				return "", err
 			}
 			mo.UserID = userID
-
-		} else if err != nil {
-			mo.UserID = mu.ID
 
 		} else {
 			logger.Infof("%s", err.Error())
