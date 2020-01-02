@@ -34,7 +34,7 @@ func GetOAuthGoogleConfig() *oauth2.Config {
 // GetOAuthFacebookConfig get config oauth2 facebok
 func GetOAuthFacebookConfig() *oauth2.Config {
 	return &oauth2.Config{
-		RedirectURL:  fmt.Sprintf("%s/auth/facebok/callback", constants.BaseURL),
+		RedirectURL:  fmt.Sprintf("%s/auth/facebook/callback", constants.BaseURL),
 		ClientID:     viper.GetString("facebook.oauth.app_id"),
 		ClientSecret: viper.GetString("facebook.oauth.secret"),
 		Scopes: []string{
