@@ -8,7 +8,7 @@ import (
 // BodyWeight Model struct
 type BodyWeight struct {
 	ID        uint      `json:"id"`
-	Weight    float32   `json:"weight"`
+	Weight    float64   `json:"weight"`
 	Image     string    `json:"image"`
 	Date      time.Time `json:"gender"`
 	UserID    uint      `json:"user_id"`
