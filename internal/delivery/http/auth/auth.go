@@ -73,10 +73,9 @@ func (a auth) AuthRegister(c echo.Context) error {
 }
 
 func (a auth) OAuthGoogleLogin(c echo.Context) error {
-	googleOauthConfig := helpers.GetOAuthGoogleConfig()
 	oauthState, cookie := helpers.GenerateStateOauthCookie()
 	c.SetCookie(&cookie)
-	u := googleOauthConfig.AuthCodeURL(oauthState)
+	u := helpers.GetOAuthGoogleConfig().AuthCodeURL(oauthState)
 	return c.Redirect(http.StatusTemporaryRedirect, u)
 }
 
@@ -109,10 +108,9 @@ func (a auth) OAuthGoogleCallback(c echo.Context) error {
 }
 
 func (a auth) OAuthFacebookLogin(c echo.Context) error {
-	facebookOauthConfig := helpers.GetOAuthFacebookConfig()
 	oauthState, cookie := helpers.GenerateStateOauthCookie()
 	c.SetCookie(&cookie)
-	u := facebookOauthConfig.AuthCodeURL(oauthState)
+	u := helpers.GetOAuthFacebookConfig().AuthCodeURL(oauthState)
 	return c.Redirect(http.StatusTemporaryRedirect, u)
 }
 

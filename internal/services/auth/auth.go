@@ -88,7 +88,7 @@ func (a auth) OAuthGoogleCallback(ctx context.Context, code string) (tokenJWT st
 }
 
 func (a auth) OAuthFacebookCallback(ctx context.Context, code string) (tokenJWT string, err error) {
-	m, err := a.repository.Auth().GetUserDataFromFacebook(ctx, helpers.GetOAuthGoogleConfig(), code)
+	m, err := a.repository.Auth().GetUserDataFromFacebook(ctx, helpers.GetOAuthFacebookConfig(), code)
 	if err != nil {
 		return "", err
 	}
