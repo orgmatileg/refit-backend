@@ -23,12 +23,10 @@ func (u BodyWeight) ValidateCreate() error {
 	)
 }
 
-// ValidateUpdate model user for update
+// // ValidateUpdate model user for update
 // func (u BodyWeight) ValidateUpdate() error {
 // 	return validation.ValidateStruct(&u,
-// 		validation.Field(&u.FullName, validation.Required, validation.Length(5, 50)),
-// 		validation.Field(&u.Email, validation.Required, is.Email),
-// 		validation.Field(&u.Gender, validation.Required, validation.In("male", "female", "others", "wont_tell")),
-// 		validation.Field(&u.RoleID, validation.In(1, 2, 3)),
+// 		validation.Field(&u.Weight, validation.Required, validation.Min(1), validation.Max(200)),
+// 		validation.Field(&u.Image, validation.Required, is.Email),
 // 	)
 // }

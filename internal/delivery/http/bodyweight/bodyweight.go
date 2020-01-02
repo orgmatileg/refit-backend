@@ -1,13 +1,12 @@
 package bodyweight
 
 import (
+	"github.com/labstack/echo"
 	"net/http"
 	"refit_backend/internal/helpers"
 	"refit_backend/internal/services"
 	"refit_backend/models"
 	"strconv"
-
-	"github.com/labstack/echo"
 )
 
 type IBodyWeight interface {
@@ -31,13 +30,13 @@ func New() IBodyWeight {
 
 // Create delivery http users
 func (b bodyweight) Create(c echo.Context) error {
-	var ru models.User
-	err := c.Bind(&ru)
+	var rm models.BodyWeight
+	err := c.Bind(&rm)
 	if err != nil {
 		return err
 	}
 	ctx := c.Request().Context()
-	_, err = b.service.Users().Create(ctx, &ru)
+	_, err = b.service.BodyWeight().Create(ctx, &rm)
 	if err != nil {
 		return helpers.MakeDefaultResponse(c, http.StatusBadRequest, err)
 	}
