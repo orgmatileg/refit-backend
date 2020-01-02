@@ -2,14 +2,16 @@ package auth
 
 import (
 	"fmt"
+	"github.com/kkdai/twitter"
+	"github.com/labstack/echo"
+	"github.com/spf13/viper"
+	"io/ioutil"
 	"net/http"
 	"refit_backend/internal/constants"
 	"refit_backend/internal/helpers"
 	"refit_backend/internal/logger"
 	"refit_backend/internal/services"
 	"refit_backend/models"
-
-	"github.com/labstack/echo"
 )
 
 // IAuth interface
@@ -143,9 +145,61 @@ func (a auth) OAuthFacebookCallback(c echo.Context) error {
 }
 
 func (a auth) OAuthTwitterLogin(c echo.Context) error {
-	return nil
+	var (
+		ConsumerKey    = viper.GetString("twitter.consumer_api_key")
+		ConsumerSecret = viper.GetString("twitter.consumer_api_secret")
+		CallbackURL    = "https://refit-api.luqmanul.com/auth/twitter/callback"
+		twitterClient  *twitter.ServerClient
+	)
+	twitterClient = twitter.NewServerClient(ConsumerKey, ConsumerSecret)
+	u := twitterClient.GetAuthURL(CallbackURL)
+	return c.Redirect(http.StatusTemporaryRedirect, u)
 }
 
 func (a auth) OAuthTwitterCallback(c echo.Context) error {
-	return nil
+	var (
+		ConsumerKey      = viper.GetString("twitter.consumer_api_key")
+		ConsumerSecret   = viper.GetString("twitter.consumer_api_secret")
+		verificationCode = c.QueryParam("oauth_verifier")
+		tokenKey         = c.QueryParam("oauth_token")
+		twitterClient    *twitter.ServerClient
+	)
+	twitterClient = twitter.NewServerClient(ConsumerKey, ConsumerSecret)
+
+	err := twitterClient.CompleteAuth(tokenKey, verificationCode)
+	if err != nil {
+		logger.Infof("could not complete auth twitter callback: %s", err.Error())
+		return c.Redirect(http.StatusTemporaryRedirect, constants.RedirectFailOAuth)
+	}
+
+	// authorization: OAuth oauth_consumer_key="CONSUMER_API_KEY", oauth_nonce="OAUTH_NONCE", oauth_signature="OAUTH_SIGNATURE", oauth_signature_method="HMAC-SHA1", oauth_timestamp="OAUTH_TIMESTAMP", oauth_token="ACCESS_TOKEN", oauth_version="1.0"
+	req, err := http.NewRequest("GET", fmt.Sprintf("https://api.twitter.com/oauth/access_token?oauth_token=%s&oauth_verifier=%s", tokenKey, verificationCode), nil)
+	if err != nil {
+		logger.Infof("%s", err.Error())
+	}
+	client := &http.Client{}
+	resp, err := client.Do(req)
+	if err != nil {
+		logger.Infof("%s", err.Error())
+	}
+	b, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		logger.Infof("%s", err.Error())
+	}
+	defer resp.Body.Close()
+	fmt.Sprintln(string(b))
+	return c.String(200, string(b))
+	// http.Get("https://api.twitter.com/1.1/account/verify_credentials.json?include_email=true")
+
+	// timelineURL := fmt.Sprintf("http://%s/time", r.Host)
+	// return c.Redirect(http.StatusTemporaryRedirect, timelineURL)
+
+	// token, err := a.service.Auth().OAuthFacebookCallback(ctx, code)
+	// if err != nil {
+	// 	logger.Infof("could not handle service callback: %s", err.Error())
+	// 	return c.Redirect(http.StatusTemporaryRedirect, constants.RedirectFailOAuth)
+	// }
+
+	// return c.Redirect(http.StatusTemporaryRedirect, fmt.Sprintf("exp://192.168.43.2:19000/--/home?setToken=%s", token))
+
 }

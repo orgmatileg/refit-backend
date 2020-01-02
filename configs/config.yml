@@ -39,3 +39,9 @@ facebook:
   oauth:
     app_id: "598388744237064"
     secret: 792dc3ea571216465f1e4742e8466267
+
+twitter:
+  consumer_api_key: myb3cNnFKLaGrw82jLu9DygnQ
+  consumer_api_secret: I6ycxOloMGMSk8HtkFseWqUBYO4PiEDKnHblR5LpGom0am9AYe
+  access_token: 150338501-nOayMXmWxsgGM77m9a4MjhbqoAHFncyWtTFmiqzp
+  access_token_secret: NTvdwhOacYzKfjNKhJ2RzcPLRHfIstw7TlYK3Vccq6J24
