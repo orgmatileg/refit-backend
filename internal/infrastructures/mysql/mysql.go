@@ -32,7 +32,6 @@ func createConnection() error {
 		viper.GetString("mysql.port"),
 		viper.GetString("mysql.dbname"),
 	)
-	fmt.Println(dsn)
 	dbCon, err := sql.Open("mysql", dsn)
 	if err != nil {
 		logger.Errorf("could not open mysql database dsn: %s")
