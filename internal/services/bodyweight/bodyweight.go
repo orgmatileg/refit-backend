@@ -2,6 +2,7 @@ package bodyweight
 
 import (
 	"context"
+	"fmt"
 	"refit_backend/internal/constants"
 	"refit_backend/internal/logger"
 	"refit_backend/internal/repository"
@@ -43,6 +44,8 @@ func (u bodyweight) Create(ctx context.Context, m *models.BodyWeight) (bodyweigh
 	}
 
 	m.CreatedAt = time.Now()
+
+	fmt.Println(m)
 
 	bodyweightID, err = u.repository.BodyWeight().Create(ctx, m)
 	if err != nil {

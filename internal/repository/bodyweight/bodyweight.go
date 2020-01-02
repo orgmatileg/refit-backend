@@ -2,7 +2,6 @@ package bodyweight
 
 import (
 	"context"
-	"database/sql"
 	"refit_backend/internal/infrastructures/mysql"
 	"refit_backend/internal/logger"
 	"refit_backend/models"
@@ -33,13 +32,9 @@ func (u bodyweight) Create(ctx context.Context, m *models.BodyWeight) (bodyweigh
 		VALUES (?, ?, ?, ?, ?)
 	`
 
-	weight := sql.NullFloat64{
-		Float64: m.Weight,
-	}
-
 	res, err := mysql.GetDB().ExecContext(ctx, q,
 		m.Weight,
-		weight,
+		m.Image,
 		m.Date,
 		m.CreatedAt,
 		m.UserID,
