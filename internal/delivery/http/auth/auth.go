@@ -158,19 +158,11 @@ func (a auth) OAuthTwitterLogin(c echo.Context) error {
 
 func (a auth) OAuthTwitterCallback(c echo.Context) error {
 	var (
-		ConsumerKey      = viper.GetString("twitter.consumer_api_key")
-		ConsumerSecret   = viper.GetString("twitter.consumer_api_secret")
+		// ConsumerKey      = viper.GetString("twitter.consumer_api_key")
+		// ConsumerSecret   = viper.GetString("twitter.consumer_api_secret")
 		verificationCode = c.QueryParam("oauth_verifier")
 		tokenKey         = c.QueryParam("oauth_token")
-		twitterClient    *twitter.ServerClient
 	)
-	twitterClient = twitter.NewServerClient(ConsumerKey, ConsumerSecret)
-
-	err := twitterClient.CompleteAuth(tokenKey, verificationCode)
-	if err != nil {
-		logger.Infof("could not complete auth twitter callback: %s", err.Error())
-		return c.Redirect(http.StatusTemporaryRedirect, constants.RedirectFailOAuth)
-	}
 
 	// authorization: OAuth oauth_consumer_key="CONSUMER_API_KEY", oauth_nonce="OAUTH_NONCE", oauth_signature="OAUTH_SIGNATURE", oauth_signature_method="HMAC-SHA1", oauth_timestamp="OAUTH_TIMESTAMP", oauth_token="ACCESS_TOKEN", oauth_version="1.0"
 	req, err := http.NewRequest("GET", "https://api.twitter.com/oauth/access_token", nil)
