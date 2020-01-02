@@ -10,7 +10,7 @@ type BodyWeight struct {
 	ID        uint      `json:"id"`
 	Weight    float64   `json:"weight"`
 	Image     string    `json:"image"`
-	Date      time.Time `json:"gender"`
+	Date      time.Time `json:"date"`
 	UserID    uint      `json:"user_id"`
 	CreatedAt time.Time `json:"created_at"`
 }
