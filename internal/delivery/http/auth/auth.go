@@ -173,10 +173,13 @@ func (a auth) OAuthTwitterCallback(c echo.Context) error {
 	}
 
 	// authorization: OAuth oauth_consumer_key="CONSUMER_API_KEY", oauth_nonce="OAUTH_NONCE", oauth_signature="OAUTH_SIGNATURE", oauth_signature_method="HMAC-SHA1", oauth_timestamp="OAUTH_TIMESTAMP", oauth_token="ACCESS_TOKEN", oauth_version="1.0"
-	req, err := http.NewRequest("GET", fmt.Sprintf("https://api.twitter.com/oauth/access_token?oauth_token=%s&oauth_verifier=%s", tokenKey, verificationCode), nil)
+	req, err := http.NewRequest("GET", "https://api.twitter.com/oauth/access_token", nil)
 	if err != nil {
 		logger.Infof("%s", err.Error())
 	}
+	req.URL.Query().Add("oauth_token", tokenKey)
+	req.URL.Query().Add("oauth_verifier", verificationCode)
+
 	client := &http.Client{}
 	resp, err := client.Do(req)
 	if err != nil {
