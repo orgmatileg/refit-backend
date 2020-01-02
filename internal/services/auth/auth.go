@@ -2,6 +2,7 @@ package auth
 
 import (
 	"context"
+	"database/sql"
 	"io/ioutil"
 	"net/http"
 	"refit_backend/internal/helpers"
@@ -57,6 +58,7 @@ func (a auth) OAuthGoogleCallback(ctx context.Context, code string) (tokenJWT st
 	}
 
 	if !exist {
+
 		userID, err := a.repository.Users().Create(ctx, &models.User{
 			Gender:    "others",
 			RoleID:    2,
@@ -205,22 +207,35 @@ func (a auth) OAuthTwitterCallback(ctx context.Context, oauthToken, oauthVerifie
 	}
 
 	if !exist {
-		userID, err := a.repository.Users().Create(ctx, &models.User{
-			Gender:    "others",
-			RoleID:    2,
-			FullName:  mt.Name,
-			Email:     mt.Email,
-			CreatedAt: time.Now(),
-			UpdatedAt: time.Now(),
-		})
-		if err != nil {
+
+		mu, err := a.repository.Users().FindOneByEmail(ctx, mt.Email)
+		if err != nil && err == sql.ErrNoRows {
+			userID, err := a.repository.Users().Create(ctx, &models.User{
+				Gender:    "others",
+				RoleID:    2,
+				FullName:  mt.Name,
+				Email:     mt.Email,
+				CreatedAt: time.Now(),
+				UpdatedAt: time.Now(),
+			})
+			if err != nil {
+				return "", err
+			}
+			mo.UserID = userID
+
+		} else if err != nil {
+			mo.UserID = mu.ID
+
+		} else {
+			logger.Infof("%s", err.Error())
 			return "", err
 		}
-		mo.UserID = userID
+
 		_, err = a.repository.Users().StoreOAuth(ctx, &mo)
 		if err != nil {
 			return "", err
 		}
+
 	}
 
 	claims := helpers.JWTPayload{
