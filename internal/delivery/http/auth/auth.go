@@ -182,11 +182,11 @@ func (a auth) OAuthTwitterCallback(c echo.Context) error {
 	if err != nil {
 		logger.Infof("%s", err.Error())
 	}
+	defer resp.Body.Close()
 	b, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
 		logger.Infof("%s", err.Error())
 	}
-	defer resp.Body.Close()
 
 	resSlice := strings.Split(string(b), "&")
 	m := make(map[string]string)
@@ -197,8 +197,20 @@ func (a auth) OAuthTwitterCallback(c echo.Context) error {
 
 	oauthWithToken := oauth1.NewToken(m["oauth_token"], m["oauth_token_secret"])
 	config := oauth1.NewConfig(ConsumerKey, ConsumerSecret)
-	config.Client(context.Background(), oauthWithToken)
-	return c.String(200, string(b))
+	httpClient := config.Client(context.Background(), oauthWithToken)
+
+	path := "https://api.twitter.com/1.1/statuses/home_timeline.json?count=2"
+	resp, err = httpClient.Get(path)
+	if err != nil {
+		logger.Infof("%s", err.Error())
+	}
+	defer resp.Body.Close()
+	body, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		logger.Infof("%s", err.Error())
+	}
+	fmt.Printf("Raw Response Body:\n%v\n", string(body))
+	return c.String(200, string(b)+string(body))
 
 	////////////
 	// req, err = http.NewRequest("GET", "https://api.twitter.com/1.1/account/verify_credentials.json?include_email=true", nil)
