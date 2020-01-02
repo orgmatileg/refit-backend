@@ -15,6 +15,7 @@ import (
 // IAuth repository interface
 type IAuth interface {
 	GetUserDataFromGoogle(ctx context.Context, oauthConfig *oauth2.Config, code string) (m *models.GoogleOAuthUserInfo, err error)
+	GetUserDataFromFacebook(ctx context.Context, oauthConfig *oauth2.Config, code string) (m *models.FacebookOAuthUserInfo, err error)
 }
 
 type auth struct{}
@@ -46,6 +47,33 @@ func (u auth) GetUserDataFromGoogle(ctx context.Context, oauthConfig *oauth2.Con
 	err = json.Unmarshal(resBody, &m)
 	if err != nil {
 		logger.Infof("could not json unmarshall response from google: %s", err.Error())
+		return nil, err
+	}
+	return m, nil
+}
+
+// GetUserDataFromGoogle repository users
+func (u auth) GetUserDataFromFacebook(ctx context.Context, oauthConfig *oauth2.Config, code string) (m *models.FacebookOAuthUserInfo, err error) {
+
+	token, err := oauthConfig.Exchange(ctx, code)
+	if err != nil {
+		logger.Infof("could not exchange authorization code to token facebook: %s", err.Error())
+		return nil, fmt.Errorf("code exchange wrong: %s", err.Error())
+	}
+	response, err := http.Get(fmt.Sprintf("https://graph.facebook.com/v3.2/me?fields=id,name,picture,email,birthday&access_token=%s", token.AccessToken))
+	if err != nil {
+		logger.Infof("could not getting user info from facebook: %s", err.Error())
+		return nil, err
+	}
+	defer response.Body.Close()
+	resBody, err := ioutil.ReadAll(response.Body)
+	if err != nil {
+		logger.Infof("could not read body from response facebook: %s", err.Error())
+		return nil, fmt.Errorf("failed read response: %s", err.Error())
+	}
+	err = json.Unmarshal(resBody, &m)
+	if err != nil {
+		logger.Infof("could not json unmarshall response from facebook: %s", err.Error())
 		return nil, err
 	}
 	return m, nil

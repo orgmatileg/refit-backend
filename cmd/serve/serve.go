@@ -106,7 +106,7 @@ func Start() {
 
 	// Start server
 	go func() {
-		if err := app.GetHTTP().Start(fmt.Sprintf("%s:%s", viper.GetString("app.baseurl"), viper.GetString("app.port"))); err != nil {
+		if err := app.GetHTTP().Start(fmt.Sprintf("%s:%s", viper.GetString("app.baseurl_no_protocol"), viper.GetString("app.port"))); err != nil {
 			logger.Infof("could not start HTTP Server: %s", err.Error())
 		}
 	}()

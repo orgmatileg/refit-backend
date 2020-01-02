@@ -1,5 +1,6 @@
 app:
-  baseurl: "0.0.0.0"
+  baseurl: https://refit-api.luqmanul.com
+  baseurl_no_protocol:
   port: 1323
 
 mobile:

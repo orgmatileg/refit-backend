@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"io/ioutil"
 	"net/http"
+	"refit_backend/internal/constants"
 	"time"
 
 	"github.com/spf13/viper"
@@ -15,10 +16,10 @@ import (
 	"golang.org/x/oauth2/google"
 )
 
-// GetOAuthGoogleConfig ...
+// GetOAuthGoogleConfig get config oauth2 google
 func GetOAuthGoogleConfig() *oauth2.Config {
 	return &oauth2.Config{
-		RedirectURL:  "https://refit-api.luqmanul.com/auth/google/callback",
+		RedirectURL:  fmt.Sprintf("%s/auth/google/callback", constants.BaseURL),
 		ClientID:     viper.GetString("google.oauth.client_id"),
 		ClientSecret: viper.GetString("google.oauth.secret"),
 		Scopes: []string{
@@ -27,6 +28,20 @@ func GetOAuthGoogleConfig() *oauth2.Config {
 			"https://www.googleapis.com/auth/plus.me",
 		},
 		Endpoint: google.Endpoint,
+	}
+}
+
+// GetOAuthFacebookConfig get config oauth2 facebok
+func GetOAuthFacebookConfig() *oauth2.Config {
+	return &oauth2.Config{
+		RedirectURL:  fmt.Sprintf("%s/auth/facebok/callback", constants.BaseURL),
+		ClientID:     viper.GetString("facebook.oauth.app_id"),
+		ClientSecret: viper.GetString("facebook.oauth.secret"),
+		Scopes: []string{
+			"user_birthday",
+			"email",
+		},
+		Endpoint: facebook.Endpoint,
 	}
 }
 
@@ -40,71 +55,6 @@ func GenerateStateOauthCookie() (string, http.Cookie) {
 	cookie := http.Cookie{Name: "oauthstate", Value: state, Expires: expiration}
 
 	return state, cookie
-}
-
-// GetUserDataFromGoogle get data from google after get token
-func GetUserDataFromGoogle(code string) ([]byte, error) {
-
-	var googleOauthConfig = &oauth2.Config{
-		RedirectURL:  "https://refit-api.luqmanul.com/auth/google/callback",
-		ClientID:     viper.GetString("google.oauth.client_id"),
-		ClientSecret: viper.GetString("google.oauth.secret"),
-		Scopes: []string{
-			"https://www.googleapis.com/auth/userinfo.email",
-			"https://www.googleapis.com/auth/userinfo.profile",
-			"https://www.googleapis.com/auth/plus.me",
-		},
-		Endpoint: google.Endpoint,
-	}
-	// Use code to get token and get user info from Google.
-	// test
-
-	token, err := googleOauthConfig.Exchange(context.Background(), code)
-	if err != nil {
-		return nil, fmt.Errorf("code exchange wrong: %s", err.Error())
-	}
-	response, err := http.Get(fmt.Sprintf("https://www.googleapis.com/oauth2/v2/userinfo?access_token=%s", token.AccessToken))
-	if err != nil {
-		return nil, fmt.Errorf("failed getting user info: %s", err.Error())
-	}
-	defer response.Body.Close()
-	contents, err := ioutil.ReadAll(response.Body)
-	if err != nil {
-		return nil, fmt.Errorf("failed read response: %s", err.Error())
-	}
-	return contents, nil
-}
-
-// GetUserDataFromFacebook get data from facebook after get token
-func GetUserDataFromFacebook(code string) ([]byte, error) {
-
-	var facebookOAuthConfig = &oauth2.Config{
-		RedirectURL:  "https://refit-api.luqmanul.com/auth/facebook/callback",
-		ClientID:     viper.GetString("facebook.oauth.app_id"),
-		ClientSecret: viper.GetString("facebook.oauth.secret"),
-		Scopes: []string{
-			"user_birthday",
-			"email",
-		},
-		Endpoint: facebook.Endpoint,
-	}
-
-	// Use code to get token and get user info from Google.
-	token, err := facebookOAuthConfig.Exchange(context.Background(), code)
-	if err != nil {
-		return nil, fmt.Errorf("code exchange wrong: %s", err.Error())
-	}
-	response, err := http.Get(fmt.Sprintf("https://graph.facebook.com/v3.2/me?fields=id,name,picture,email,birthday&access_token=%s", token.AccessToken))
-	// response, err := http.Get(fmt.Sprintf("https://graph.facebook.com/v3.2/me?fields=id,name,email&access_token=%s", token.AccessToken))
-	if err != nil {
-		return nil, fmt.Errorf("failed getting user info: %s", err.Error())
-	}
-	defer response.Body.Close()
-	contents, err := ioutil.ReadAll(response.Body)
-	if err != nil {
-		return nil, fmt.Errorf("failed read response: %s", err.Error())
-	}
-	return contents, nil
 }
 
 // GetUserDataFromTwitter get data from twitter after get token

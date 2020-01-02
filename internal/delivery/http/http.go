@@ -42,7 +42,6 @@ func (s *serverHTTP) InitMiddleWare() {
 	s.http.HTTPErrorHandler = s.GetHandler().Tools().DefaultErrorHandler
 	s.http.Pre(middleware.RemoveTrailingSlash())
 	s.http.Pre(middleware.CORS())
-	s.http.Pre(middleware.Logger())
 }
 
 // InitRouter HTTP
@@ -55,6 +54,13 @@ func (s *serverHTTP) InitRouter() {
 		SigningKey:  []byte(viper.GetString("jwt.secret")),
 		TokenLookup: "header:Authorization",
 	})
+
+	s.http.Use(middleware.StaticWithConfig(middleware.StaticConfig{
+		Root:   "static",
+		Browse: false,
+		HTML5:  true,
+		Index:  "index.html",
+	}))
 
 	// ============================== //
 	//        No Need Auth            //

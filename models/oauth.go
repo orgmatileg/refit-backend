@@ -22,3 +22,20 @@ type GoogleOAuthUserInfo struct {
 	Picture       string `json:"picture"`
 	Locale        string `json:"local"`
 }
+
+// FacebookOAuthUserInfo struct							|
+// endpoint: https://graph.facebook.com/v3.2/me?fields=id,name,picture,email,birthday&access_token=
+type FacebookOAuthUserInfo struct {
+	OpenID   string `json:"id"`
+	Email    string `json:"email"`
+	Name     string `json:"name"`
+	BirthDay string `json:"birthday"`
+	Picture  struct {
+		Data struct {
+			Height       uint   `json:"height"`
+			Width        uint   `json:"width"`
+			IsSilhouette bool   `json:"is_silhouette"`
+			URL          string `json:"url"`
+		} `json:"data"`
+	} `json:"picture"`
+}

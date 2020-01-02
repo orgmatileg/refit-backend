@@ -2,18 +2,14 @@ package auth
 
 import (
 	"fmt"
-	"log"
 	"net/http"
+	"refit_backend/internal/constants"
 	"refit_backend/internal/helpers"
 	"refit_backend/internal/logger"
 	"refit_backend/internal/services"
 	"refit_backend/models"
 
 	"github.com/labstack/echo"
-	"github.com/spf13/viper"
-	"golang.org/x/oauth2"
-	"golang.org/x/oauth2/facebook"
-	"golang.org/x/oauth2/google"
 )
 
 // IAuth interface
@@ -77,23 +73,10 @@ func (a auth) AuthRegister(c echo.Context) error {
 }
 
 func (a auth) OAuthGoogleLogin(c echo.Context) error {
-	var googleOauthConfig = &oauth2.Config{
-		RedirectURL:  "https://refit-api.luqmanul.com/auth/google/callback",
-		ClientID:     viper.GetString("google.oauth.client_id"),
-		ClientSecret: viper.GetString("google.oauth.secret"),
-		Scopes: []string{
-			"https://www.googleapis.com/auth/userinfo.email",
-			"https://www.googleapis.com/auth/userinfo.profile",
-			"https://www.googleapis.com/auth/plus.me",
-		},
-		Endpoint: google.Endpoint,
-	}
-
-	// Create oauthState cookie
+	googleOauthConfig := helpers.GetOAuthGoogleConfig()
 	oauthState, cookie := helpers.GenerateStateOauthCookie()
 	c.SetCookie(&cookie)
 	u := googleOauthConfig.AuthCodeURL(oauthState)
-
 	return c.Redirect(http.StatusTemporaryRedirect, u)
 }
 
@@ -105,74 +88,60 @@ func (a auth) OAuthGoogleCallback(c echo.Context) error {
 		ctx   = c.Request().Context()
 	)
 
-	// Read oauthState from Cookie
 	oauthState, err := c.Cookie("oauthstate")
 	if err != nil {
-		// TODO: create static redirect page for failed oauth
 		logger.Infof("could not get cookie: %s", err.Error())
-		return c.Redirect(http.StatusTemporaryRedirect, "luqmanul.com")
+		return c.Redirect(http.StatusTemporaryRedirect, constants.RedirectFailOAuth)
 	}
 
 	if state != oauthState.Value {
-		// TODO: create static redirect page for failed oauth
 		logger.Infof("oauth google state not equal")
-		return c.Redirect(http.StatusTemporaryRedirect, "luqmanul.com")
+		return c.Redirect(http.StatusTemporaryRedirect, constants.RedirectFailOAuth)
 	}
 
 	token, err := a.service.Auth().OAuthGoogleCallback(ctx, code)
 	if err != nil {
-		// TODO: create static redirect page for failed oauth
 		logger.Infof("could not handle service callback: %s", err.Error())
-		return c.Redirect(http.StatusTemporaryRedirect, "luqmanul.com")
+		return c.Redirect(http.StatusTemporaryRedirect, constants.RedirectFailOAuth)
 	}
 
 	return c.Redirect(http.StatusTemporaryRedirect, fmt.Sprintf("exp://192.168.43.2:19000/--/home?setToken=%s", token))
 }
 
 func (a auth) OAuthFacebookLogin(c echo.Context) error {
-	var facebookOauthConfig = &oauth2.Config{
-		RedirectURL:  "https://refit-api.luqmanul.com/auth/facebook/callback",
-		ClientID:     viper.GetString("facebook.oauth.app_id"),
-		ClientSecret: viper.GetString("facebook.oauth.secret"),
-		Scopes: []string{
-			"user_birthday",
-			"email",
-		},
-		Endpoint: facebook.Endpoint,
-	}
-
-	// Create oauthState cookie
+	facebookOauthConfig := helpers.GetOAuthFacebookConfig()
 	oauthState, cookie := helpers.GenerateStateOauthCookie()
 	c.SetCookie(&cookie)
 	u := facebookOauthConfig.AuthCodeURL(oauthState)
-
 	return c.Redirect(http.StatusTemporaryRedirect, u)
 }
 
 func (a auth) OAuthFacebookCallback(c echo.Context) error {
 
-	// Read oauthState from Cookie
-	oauthState, _ := c.Cookie("oauthstate")
+	var (
+		state = c.FormValue("state")
+		code  = c.FormValue("code")
+		ctx   = c.Request().Context()
+	)
 
-	if c.FormValue("state") != oauthState.Value {
-		log.Println("invalid oauth facebook state")
-		c.Redirect(http.StatusTemporaryRedirect, "luqmanul.com")
-		return nil
-	}
-
-	data, err := helpers.GetUserDataFromFacebook(c.FormValue("code"))
+	oauthState, err := c.Cookie("oauthstate")
 	if err != nil {
-		log.Println(err.Error())
-		c.Redirect(http.StatusTemporaryRedirect, "luqmanul.com")
-		return nil
+		logger.Infof("could not get cookie: %s", err.Error())
+		return c.Redirect(http.StatusTemporaryRedirect, constants.RedirectFailOAuth)
 	}
 
-	// GetOrCreate User in your db.
-	// Redirect or response with a token.
-	// More code .....
-	// fmt.Fprintf(w, "UserInfo: %s\n", data)
+	if state != oauthState.Value {
+		logger.Infof("oauth facebook state not equal")
+		return c.Redirect(http.StatusTemporaryRedirect, constants.RedirectFailOAuth)
+	}
 
-	return c.JSON(http.StatusOK, string(data))
+	token, err := a.service.Auth().OAuthFacebookCallback(ctx, code)
+	if err != nil {
+		logger.Infof("could not handle service callback: %s", err.Error())
+		return c.Redirect(http.StatusTemporaryRedirect, constants.RedirectFailOAuth)
+	}
+
+	return c.Redirect(http.StatusTemporaryRedirect, fmt.Sprintf("exp://192.168.43.2:19000/--/home?setToken=%s", token))
 }
 
 func (a auth) OAuthTwitterLogin(c echo.Context) error {

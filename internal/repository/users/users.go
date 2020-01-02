@@ -297,8 +297,6 @@ func (u users) IsExistsOAuth(ctx context.Context, m *models.OAuth) (isExists boo
 	}
 	if OAuthID > 0 {
 		return true, OAuthID, nil
-	} else {
-		return false, 0, nil
 	}
-
+	return false, 0, nil
 }

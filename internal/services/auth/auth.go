@@ -19,6 +19,7 @@ var (
 // IAuth interface
 type IAuth interface {
 	OAuthGoogleCallback(ctx context.Context, code string) (tokenJWT string, err error)
+	OAuthFacebookCallback(ctx context.Context, code string) (tokenJWT string, err error)
 }
 
 type auth struct {
@@ -42,6 +43,59 @@ func (a auth) OAuthGoogleCallback(ctx context.Context, code string) (tokenJWT st
 	mo := models.OAuth{
 		OpenID:  m.OpenID,
 		Service: "google",
+	}
+
+	exist, _, err := a.repository.Users().IsExistsOAuth(ctx, &mo)
+	if err != nil {
+		return "", err
+	}
+
+	if !exist {
+		userID, err := a.repository.Users().Create(ctx, &models.User{
+			Gender:    "others",
+			RoleID:    2,
+			FullName:  m.Name,
+			Email:     m.Email,
+			CreatedAt: time.Now(),
+			UpdatedAt: time.Now(),
+		})
+		if err != nil {
+			return "", err
+		}
+		mo.UserID = userID
+		_, err = a.repository.Users().StoreOAuth(ctx, &mo)
+		if err != nil {
+			return "", err
+		}
+	}
+
+	claims := helpers.JWTPayload{
+		StandardClaims: &jwt.StandardClaims{
+			Audience:  "MOBILE",
+			Issuer:    "Luqmanul Hakim API",
+			IssuedAt:  time.Now().Unix(),
+			ExpiresAt: time.Now().Add(time.Minute * time.Duration(1440)).Unix(),
+		},
+	}
+
+	tokenJWT, err = helpers.GetJWTTokenGenerator().GenerateToken(claims)
+	if err != nil {
+		logger.Infof("could not generate token: %s", err.Error())
+		return "", err
+	}
+
+	return tokenJWT, nil
+}
+
+func (a auth) OAuthFacebookCallback(ctx context.Context, code string) (tokenJWT string, err error) {
+	m, err := a.repository.Auth().GetUserDataFromFacebook(ctx, helpers.GetOAuthGoogleConfig(), code)
+	if err != nil {
+		return "", err
+	}
+
+	mo := models.OAuth{
+		OpenID:  m.OpenID,
+		Service: "facebook",
 	}
 
 	exist, _, err := a.repository.Users().IsExistsOAuth(ctx, &mo)
