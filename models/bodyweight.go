@@ -22,7 +22,7 @@ func (u BodyWeight) ValidateCreate() error {
 		return errors.New("weight: cannot below 0")
 	}
 
-	if u.Weight < 10000 {
+	if u.Weight > 10000 {
 		return errors.New("weight: cannot above 10000")
 	}
 
