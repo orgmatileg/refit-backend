@@ -4,6 +4,7 @@ import (
 	"context"
 	"refit_backend/internal/constants"
 	"refit_backend/internal/logger"
+	"refit_backend/internal/repository"
 	"refit_backend/models"
 	"time"
 )
@@ -18,11 +19,15 @@ type IBodyWeight interface {
 	Count(ctx context.Context)
 }
 
-type bodyweight struct{}
+type bodyweight struct {
+	repository repository.IRepository
+}
 
 // New Repository todos
 func New() IBodyWeight {
-	return &bodyweight{}
+	return &bodyweight{
+		repository: repository.New(),
+	}
 }
 
 func (u bodyweight) Create(ctx context.Context, m *models.BodyWeight) (bodyweightID uint, err error) {
@@ -38,6 +43,12 @@ func (u bodyweight) Create(ctx context.Context, m *models.BodyWeight) (bodyweigh
 	}
 
 	m.CreatedAt = time.Now()
+
+	bodyweightID, err = u.repository.BodyWeight().Create(ctx, m)
+	if err != nil {
+		logger.Infof("could not create bodyweight repository: %s", err.Error())
+		return 0, err
+	}
 
 	return bodyweightID, nil
 }
