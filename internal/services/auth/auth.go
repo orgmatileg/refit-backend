@@ -59,18 +59,29 @@ func (a auth) OAuthGoogleCallback(ctx context.Context, code string) (tokenJWT st
 
 	if !exist {
 
-		userID, err := a.repository.Users().Create(ctx, &models.User{
-			Gender:    "others",
-			RoleID:    2,
-			FullName:  m.Name,
-			Email:     m.Email,
-			CreatedAt: time.Now(),
-			UpdatedAt: time.Now(),
-		})
-		if err != nil {
+		mu, err := a.repository.Users().FindOneByEmail(ctx, m.Email)
+		if err != nil && err == sql.ErrNoRows {
+			userID, err := a.repository.Users().Create(ctx, &models.User{
+				Gender:    "others",
+				RoleID:    2,
+				FullName:  m.Name,
+				Email:     m.Email,
+				CreatedAt: time.Now(),
+				UpdatedAt: time.Now(),
+			})
+			if err != nil {
+				return "", err
+			}
+			mo.UserID = userID
+
+		} else if err != nil {
+			mo.UserID = mu.ID
+
+		} else {
+			logger.Infof("%s", err.Error())
 			return "", err
 		}
-		mo.UserID = userID
+
 		_, err = a.repository.Users().StoreOAuth(ctx, &mo)
 		if err != nil {
 			return "", err
@@ -112,18 +123,29 @@ func (a auth) OAuthFacebookCallback(ctx context.Context, code string) (tokenJWT 
 	}
 
 	if !exist {
-		userID, err := a.repository.Users().Create(ctx, &models.User{
-			Gender:    "others",
-			RoleID:    2,
-			FullName:  m.Name,
-			Email:     m.Email,
-			CreatedAt: time.Now(),
-			UpdatedAt: time.Now(),
-		})
-		if err != nil {
+		mu, err := a.repository.Users().FindOneByEmail(ctx, m.Email)
+		if err != nil && err == sql.ErrNoRows {
+			userID, err := a.repository.Users().Create(ctx, &models.User{
+				Gender:    "others",
+				RoleID:    2,
+				FullName:  m.Name,
+				Email:     m.Email,
+				CreatedAt: time.Now(),
+				UpdatedAt: time.Now(),
+			})
+			if err != nil {
+				return "", err
+			}
+			mo.UserID = userID
+
+		} else if err != nil {
+			mo.UserID = mu.ID
+
+		} else {
+			logger.Infof("%s", err.Error())
 			return "", err
 		}
-		mo.UserID = userID
+
 		_, err = a.repository.Users().StoreOAuth(ctx, &mo)
 		if err != nil {
 			return "", err
@@ -189,7 +211,6 @@ func (a auth) OAuthTwitterCallback(ctx context.Context, oauthToken, oauthVerifie
 	config := oauth1.NewConfig(ConsumerKey, ConsumerSecret)
 	httpClient := config.Client(ctx, token)
 
-	/////////////
 	mt, err := a.repository.Auth().GetUserDataFromTwitter(httpClient)
 	if err != nil {
 		logger.Infof("%s", err.Error())
