@@ -1,9 +1,8 @@
 package models
 
 import (
+	"errors"
 	"time"
-
-	validation "github.com/go-ozzo/ozzo-validation/v3"
 )
 
 // BodyWeight Model struct
@@ -18,9 +17,16 @@ type BodyWeight struct {
 
 // ValidateCreate model user for create
 func (u BodyWeight) ValidateCreate() error {
-	return validation.ValidateStruct(&u,
-		validation.Field(&u.Weight, validation.Required, validation.Min(1), validation.Max(500)),
-	)
+
+	if u.Weight < 0 {
+		return errors.New("weight: cannot below 0")
+	}
+
+	if u.Weight < 10000 {
+		return errors.New("weight: cannot above 10000")
+	}
+
+	return nil
 }
 
 // // ValidateUpdate model user for update
