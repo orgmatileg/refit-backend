@@ -169,8 +169,10 @@ func (a auth) OAuthTwitterCallback(c echo.Context) error {
 	if err != nil {
 		logger.Infof("%s", err.Error())
 	}
-	req.URL.Query().Add("oauth_token", tokenKey)
-	req.URL.Query().Add("oauth_verifier", verificationCode)
+	q := req.URL.Query()
+	q.Add("oauth_token", tokenKey)
+	q.Add("oauth_verifier", verificationCode)
+	req.URL.RawQuery = q.Encode()
 
 	client := &http.Client{}
 	resp, err := client.Do(req)
