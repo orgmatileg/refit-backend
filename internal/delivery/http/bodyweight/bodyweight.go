@@ -4,6 +4,7 @@ import (
 	"github.com/labstack/echo"
 	"net/http"
 	"refit_backend/internal/helpers"
+	"refit_backend/internal/logger"
 	"refit_backend/internal/services"
 	"refit_backend/models"
 	"strconv"
@@ -30,13 +31,21 @@ func New() IBodyWeight {
 
 // Create delivery http users
 func (b bodyweight) Create(c echo.Context) error {
-	var rm models.BodyWeight
-	err := c.Bind(&rm)
+
+	fh, err := c.FormFile("image")
 	if err != nil {
-		return err
+		logger.Infof("could not read form file from request: %s", err.Error())
+		return helpers.MakeDefaultResponse(c, http.StatusBadRequest, err)
 	}
-	ctx := c.Request().Context()
-	_, err = b.service.BodyWeight().Create(ctx, &rm)
+
+	var (
+		ctx    = c.Request().Context()
+		weight = c.FormValue("weight")
+		date   = c.FormValue("date")
+		userID = c.FormValue("user_id")
+	)
+
+	_, err = b.service.BodyWeight().Create(ctx, weight, date, userID, fh)
 	if err != nil {
 		return helpers.MakeDefaultResponse(c, http.StatusBadRequest, err)
 	}
