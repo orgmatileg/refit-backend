@@ -78,7 +78,7 @@ func (u bodyweight) Create(ctx context.Context, weight, date, userID string, fh 
 		_, err = s3.GetS3Client().PutObjectWithContext(
 			ctx,
 			"static-luqmanul",
-			fmt.Sprintf("%d.%s", time.Now().Unix(), helpers.GetExtensionFile(ft)),
+			fmt.Sprintf("refit/users/%s/bodyweights/%d.%s", userID, time.Now().Unix(), helpers.GetExtensionFile(ft)),
 			f,
 			fh.Size,
 			minio.PutObjectOptions{
