@@ -70,6 +70,7 @@ func (u bodyweight) Create(ctx context.Context, weight, date, userID string, fh 
 			logger.Infof("could not open file header %s", err.Error())
 			return 0, err
 		}
+		defer f.Close()
 
 		ft := fh.Header.Get("Content-Type")
 
