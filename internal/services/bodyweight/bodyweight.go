@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"mime/multipart"
 	"refit_backend/internal/constants"
+	"refit_backend/internal/helpers"
 	"refit_backend/internal/infrastructures/s3"
 	"refit_backend/internal/logger"
 	"refit_backend/internal/repository"
@@ -77,7 +78,7 @@ func (u bodyweight) Create(ctx context.Context, weight, date, userID string, fh 
 		_, err = s3.GetS3Client().PutObjectWithContext(
 			ctx,
 			"static-luqmanul",
-			fmt.Sprintf("%d.png", time.Now().Unix()),
+			fmt.Sprintf("%d.%s", time.Now().Unix(), helpers.GetExtensionFile(ft)),
 			f,
 			fh.Size,
 			minio.PutObjectOptions{
