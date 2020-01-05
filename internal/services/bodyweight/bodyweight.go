@@ -12,20 +12,25 @@ import (
 	"refit_backend/internal/logger"
 	"refit_backend/internal/repository"
 	"refit_backend/models"
+	"regexp"
 	"strconv"
 	"time"
 
+	validation "github.com/go-ozzo/ozzo-validation"
 	"github.com/minio/minio-go"
+)
+
+var (
+	regexNumberOnly = regexp.MustCompile("^[0-9]*$")
 )
 
 // IBodyWeight interface
 type IBodyWeight interface {
 	Create(ctx context.Context, weight, date, userID string, fh *multipart.FileHeader) (bodyweightID uint, err error)
-	FindOne(ctx context.Context)
+	FindOneByID(ctx context.Context, bodyWeightID string) (m *models.BodyWeight, err error)
 	FindAll(ctx context.Context, limit, offset, order, userID string) (lm []*models.BodyWeight, count uint, err error)
-	Update(ctx context.Context)
-	Delete(ctx context.Context)
-	Count(ctx context.Context)
+	UpdateByID(ctx context.Context, rm *models.BodyWeight, bodyweightID string) (err error)
+	DeleteByID(ctx context.Context, bodyWeightID string) (err error)
 }
 
 type bodyweight struct {
@@ -104,7 +109,26 @@ func (u bodyweight) Create(ctx context.Context, weight, date, userID string, fh 
 	return bodyweightID, nil
 }
 
-func (u bodyweight) FindOne(ctx context.Context) {}
+func (u bodyweight) FindOneByID(ctx context.Context, bodyWeightID string) (m *models.BodyWeight, err error) {
+	err = validation.Validate(bodyWeightID, validation.Match(regexNumberOnly))
+	if err != nil {
+		logger.Infof("could not validate: %s", err.Error())
+		return nil, errors.New("invalid bodyweight_id param, should be number only")
+	}
+	m, err = u.repository.BodyWeight().FindOneByID(ctx, bodyWeightID)
+	if err != nil {
+		switch {
+		case err == sql.ErrNoRows:
+			logger.Infof("could not find bodyweight by id: %s", err.Error())
+			return nil, errors.New("bodyweight_id not exists")
+		default:
+			logger.Infof("could not find bodyweight by id: %s", err.Error())
+			return nil, err
+		}
+	}
+
+	return m, nil
+}
 
 func (u bodyweight) FindAll(ctx context.Context, limit, offset, order, userID string) (lm []*models.BodyWeight, count uint, err error) {
 	err = helpers.ValidationQueryParamFindAll(limit, offset, order)
@@ -140,6 +164,48 @@ func (u bodyweight) FindAll(ctx context.Context, limit, offset, order, userID st
 	return lm, count, nil
 }
 
-func (u bodyweight) Update(ctx context.Context) {}
-func (u bodyweight) Delete(ctx context.Context) {}
-func (u bodyweight) Count(ctx context.Context)  {}
+func (u bodyweight) UpdateByID(ctx context.Context, rm *models.BodyWeight, bodyweightID string) (err error) {
+
+	mb, err := u.repository.BodyWeight().FindOneByID(ctx, bodyweightID)
+	if err != nil {
+		switch {
+		case err == sql.ErrNoRows:
+			logger.Infof("could not find bodyweight by id: %s", err.Error())
+			return errors.New("bodyweight_id not exists")
+		default:
+			logger.Infof("could not find bodyweight by id: %s", err.Error())
+			return err
+		}
+	}
+
+	rm.UserID = mb.UserID
+	rm.CreatedAt = mb.CreatedAt
+
+	_, err = u.repository.BodyWeight().UpdateByID(ctx, rm, bodyweightID)
+	if err != nil {
+		logger.Infof("could not update bodyweight by id: %s", err.Error())
+		return err
+	}
+	return nil
+}
+
+func (u bodyweight) DeleteByID(ctx context.Context, bodyweightID string) (err error) {
+
+	err = validation.Validate(bodyweightID, validation.Match(regexNumberOnly))
+	if err != nil {
+		logger.Infof("could not validate: %s", err.Error())
+		return errors.New("invalid bodyweight_id param, should be number only")
+	}
+	_, err = u.repository.BodyWeight().DeleteByID(ctx, bodyweightID)
+	if err != nil {
+		switch {
+		case err == sql.ErrNoRows:
+			logger.Infof("could not delete bodyweight by id: %s", err.Error())
+			return errors.New("bodyweight_id not exists")
+		default:
+			logger.Infof("could not delete bodyweight by id: %s", err.Error())
+			return err
+		}
+	}
+	return nil
+}

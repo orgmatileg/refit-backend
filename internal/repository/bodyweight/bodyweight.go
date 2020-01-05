@@ -11,10 +11,10 @@ import (
 // IBodyWeight interface
 type IBodyWeight interface {
 	Create(ctx context.Context, m *models.BodyWeight) (bodyweightID uint, err error)
-	FindOne(ctx context.Context)
+	FindOneByID(ctx context.Context, bodyWeightID string) (m *models.BodyWeight, err error)
 	FindAll(ctx context.Context, limit, offset, order, userID string) (lm []*models.BodyWeight, err error)
-	Update(ctx context.Context)
-	Delete(ctx context.Context)
+	UpdateByID(ctx context.Context, m *models.BodyWeight, bodyWeightID string) (rowUpdated int64, err error)
+	DeleteByID(ctx context.Context, bodyWeightID string) (rowDeleted int64, err error)
 	Count(ctx context.Context, userID string) (count uint, err error)
 }
 
@@ -54,7 +54,25 @@ func (u bodyweight) Create(ctx context.Context, m *models.BodyWeight) (bodyweigh
 	return uint(lastInsertedID), nil
 }
 
-func (u bodyweight) FindOne(ctx context.Context) {}
+func (u bodyweight) FindOneByID(ctx context.Context, bodyWeightID string) (m *models.BodyWeight, err error) {
+	q := `
+		SELECT id, weight, image, date, user_id, created_at
+		FROM body_weight
+		WHERE id = ?
+	`
+	err = mysql.GetDB().QueryRowContext(ctx, q, bodyWeightID).Scan(
+		&m.ID,
+		&m.Weight,
+		&m.Image,
+		&m.Date,
+		&m.UserID,
+		&m.CreatedAt,
+	)
+	if err != nil {
+		return nil, err
+	}
+	return m, nil
+}
 
 func (u bodyweight) FindAll(ctx context.Context, limit, offset, order, userID string) (lm []*models.BodyWeight, err error) {
 	q := fmt.Sprintf(`
@@ -93,9 +111,43 @@ func (u bodyweight) FindAll(ctx context.Context, limit, offset, order, userID st
 	return lm, nil
 }
 
-func (u bodyweight) Update(ctx context.Context) {}
+func (u bodyweight) UpdateByID(ctx context.Context, m *models.BodyWeight, bodyWeightID string) (rowUpdated int64, err error) {
+	q := `
+	UPDATE body_weight
+	SET weight=?, date=?, image=?
+	WHERE id=? 
+`
+	res, err := mysql.GetDB().ExecContext(ctx, q,
+		m.Weight,
+		m.Date,
+		m.Image,
+		bodyWeightID,
+	)
+	if err != nil {
+		return -1, err
+	}
+	rowUpdated, err = res.RowsAffected()
+	if err != nil {
+		return -1, err
+	}
+	return rowUpdated, nil
+}
 
-func (u bodyweight) Delete(ctx context.Context) {}
+func (u bodyweight) DeleteByID(ctx context.Context, bodyWeightID string) (rowDeleted int64, err error) {
+	q := `
+		DELETE FROM body_weight
+		WHERE id = ?
+	`
+	res, err := mysql.GetDB().ExecContext(ctx, q, bodyWeightID)
+	if err != nil {
+		return -1, err
+	}
+	rowDeleted, err = res.RowsAffected()
+	if err != nil {
+		return -1, err
+	}
+	return rowDeleted, nil
+}
 
 func (u bodyweight) Count(ctx context.Context, userID string) (count uint, err error) {
 

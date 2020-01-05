@@ -54,14 +54,13 @@ func (b bodyweight) Create(c echo.Context) error {
 
 // FindOneByID delivery http users
 func (b bodyweight) FindOneByID(c echo.Context) error {
-	userID := c.Param("id")
+	bodyweightID := c.Param("id")
 	ctx := c.Request().Context()
-
-	mu, err := b.service.Users().FindOneByID(ctx, userID)
+	m, err := b.service.BodyWeight().FindOneByID(ctx, bodyweightID)
 	if err != nil {
 		return helpers.MakeDefaultResponse(c, http.StatusBadRequest, err)
 	}
-	return helpers.MakeDefaultResponse(c, http.StatusOK, mu)
+	return helpers.MakeDefaultResponse(c, http.StatusOK, m)
 }
 
 // FindAll delivery http users
@@ -108,15 +107,14 @@ func (b bodyweight) FindAll(c echo.Context) error {
 
 // UpdateByID delivery http users
 func (b bodyweight) UpdateByID(c echo.Context) error {
-	var ru models.User
-	err := c.Bind(&ru)
+	var rm models.BodyWeight
+	err := c.Bind(&rm)
 	if err != nil {
 		return err
 	}
-	userID := c.Param("id")
-
+	bodyWeightID := c.Param("id")
 	ctx := c.Request().Context()
-	err = b.service.Users().UpdateByID(ctx, &ru, userID)
+	err = b.service.BodyWeight().UpdateByID(ctx, &rm, bodyWeightID)
 	if err != nil {
 		return helpers.MakeDefaultResponse(c, http.StatusBadRequest, err)
 	}
@@ -125,9 +123,9 @@ func (b bodyweight) UpdateByID(c echo.Context) error {
 
 // DeleteByID http users
 func (b bodyweight) DeleteByID(c echo.Context) error {
-	userID := c.Param("id")
+	bodyweightID := c.Param("id")
 	ctx := c.Request().Context()
-	err := b.service.Users().DeleteByID(ctx, userID)
+	err := b.service.BodyWeight().DeleteByID(ctx, bodyweightID)
 	if err != nil {
 		return helpers.MakeDefaultResponse(c, http.StatusBadRequest, err)
 	}
