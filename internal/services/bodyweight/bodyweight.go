@@ -2,6 +2,8 @@ package bodyweight
 
 import (
 	"context"
+	"database/sql"
+	"errors"
 	"fmt"
 	"mime/multipart"
 	"refit_backend/internal/constants"
@@ -20,7 +22,7 @@ import (
 type IBodyWeight interface {
 	Create(ctx context.Context, weight, date, userID string, fh *multipart.FileHeader) (bodyweightID uint, err error)
 	FindOne(ctx context.Context)
-	FindAll(ctx context.Context)
+	FindAll(ctx context.Context, limit, offset, order, userID string) (lm []*models.BodyWeight, count uint, err error)
 	Update(ctx context.Context)
 	Delete(ctx context.Context)
 	Count(ctx context.Context)
@@ -103,7 +105,41 @@ func (u bodyweight) Create(ctx context.Context, weight, date, userID string, fh 
 }
 
 func (u bodyweight) FindOne(ctx context.Context) {}
-func (u bodyweight) FindAll(ctx context.Context) {}
-func (u bodyweight) Update(ctx context.Context)  {}
-func (u bodyweight) Delete(ctx context.Context)  {}
-func (u bodyweight) Count(ctx context.Context)   {}
+
+func (u bodyweight) FindAll(ctx context.Context, limit, offset, order, userID string) (lm []*models.BodyWeight, count uint, err error) {
+	err = helpers.ValidationQueryParamFindAll(limit, offset, order)
+	if err != nil {
+		logger.Infof("could not validate: %s", err.Error())
+		return nil, 0, err
+	}
+
+	lm, err = u.repository.BodyWeight().FindAll(ctx, limit, offset, order, userID)
+	if err != nil {
+		switch {
+		case err == sql.ErrNoRows:
+			logger.Infof("could not find all BodyWeight: %s", err.Error())
+			return nil, 0, errors.New("no row exists")
+		default:
+			logger.Infof("could not find all BodyWeight: %s", err.Error())
+			return nil, 0, err
+		}
+	}
+
+	count, err = u.repository.BodyWeight().Count(ctx, userID)
+	if err != nil {
+		switch {
+		case err == sql.ErrNoRows:
+			logger.Infof("could not find all body_weight: %s", err.Error())
+			return nil, 0, errors.New("no row exists")
+		default:
+			logger.Infof("could not find all body_weight: %s", err.Error())
+			return nil, 0, err
+		}
+	}
+
+	return lm, count, nil
+}
+
+func (u bodyweight) Update(ctx context.Context) {}
+func (u bodyweight) Delete(ctx context.Context) {}
+func (u bodyweight) Count(ctx context.Context)  {}

@@ -71,6 +71,7 @@ func (b bodyweight) FindAll(c echo.Context) error {
 		limit  = "20"
 		offset = "0"
 		order  = "desc"
+		userID = ""
 	)
 
 	if v := c.QueryParam("limit"); v != "" {
@@ -82,8 +83,11 @@ func (b bodyweight) FindAll(c echo.Context) error {
 	if v := c.QueryParam("order"); v != "" {
 		order = v
 	}
+	if v := c.QueryParam("user_id"); v != "" {
+		userID = v
+	}
 
-	mu, count, err := b.service.Users().FindAll(ctx, limit, offset, order)
+	mu, count, err := b.service.BodyWeight().FindAll(ctx, limit, offset, order, userID)
 	if err != nil {
 		return helpers.MakeDefaultResponse(c, http.StatusBadRequest, err)
 	}
