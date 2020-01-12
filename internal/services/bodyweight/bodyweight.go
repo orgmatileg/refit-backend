@@ -63,6 +63,7 @@ func (u bodyweight) Create(ctx context.Context, weight, date, userID string, fh 
 	m.Weight = float64(weightInt)
 
 	userIDInt, err := strconv.Atoi(userID)
+	unixTime := time.Now().Unix()
 	if err != nil {
 		logger.Infof("could not parse weight string to float64: %s", err.Error())
 		return 0, err
@@ -85,7 +86,7 @@ func (u bodyweight) Create(ctx context.Context, weight, date, userID string, fh 
 		_, err = s3.GetS3Client().PutObjectWithContext(
 			ctx,
 			"static-luqmanul",
-			fmt.Sprintf("refit/users/%s/bodyweights/%d.%s", userID, time.Now().Unix(), helpers.GetExtensionFile(ft)),
+			fmt.Sprintf("refit/users/%s/bodyweights/%d.%s", userID, unixTime, helpers.GetExtensionFile(ft)),
 			f,
 			fh.Size,
 			minio.PutObjectOptions{
@@ -98,6 +99,7 @@ func (u bodyweight) Create(ctx context.Context, weight, date, userID string, fh 
 		}
 
 	}
+	m.Image = fmt.Sprintf("https://static.luqmanul.com/refit/users/%s/bodyweights/%d.%s", userID, unixTime, helpers.GetExtensionFile(fh.Header.Get("Content-Type")))
 	m.CreatedAt = time.Now()
 
 	bodyweightID, err = u.repository.BodyWeight().Create(ctx, &m)
