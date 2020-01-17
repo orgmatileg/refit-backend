@@ -137,6 +137,7 @@ func (u users) AuthLoginWithEmail(ctx context.Context, ru *models.User) (token s
 	}
 
 	claims := helpers.JWTPayload{
+		UserID: mu.ID,
 		StandardClaims: &jwt.StandardClaims{
 			Audience:  "MOBILE",
 			Issuer:    "Luqmanul Hakim API",

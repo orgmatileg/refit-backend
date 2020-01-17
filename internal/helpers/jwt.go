@@ -9,6 +9,7 @@ import (
 
 // JWTPayload struct
 type JWTPayload struct {
+	UserID uint
 	*jwt.StandardClaims
 }
 
