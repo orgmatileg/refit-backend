@@ -33,7 +33,7 @@ func New() IBodyWeight {
 func (b bodyweight) Create(c echo.Context) error {
 
 	fh, err := c.FormFile("image")
-	if err != nil {
+	if err != nil && err.Error() != "http: no such file" {
 		logger.Infof("could not read form file from request: %s", err.Error())
 		return helpers.MakeDefaultResponse(c, http.StatusBadRequest, err)
 	}

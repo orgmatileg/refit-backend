@@ -97,9 +97,9 @@ func (u bodyweight) Create(ctx context.Context, weight, date, userID string, fh 
 			logger.Infof("could not put object to spaces: %s", err.Error())
 			return 0, err
 		}
+		m.Image = fmt.Sprintf("https://static.luqmanul.com/refit/users/%s/bodyweights/%d.%s", userID, unixTime, helpers.GetExtensionFile(fh.Header.Get("Content-Type")))
 
 	}
-	m.Image = fmt.Sprintf("https://static.luqmanul.com/refit/users/%s/bodyweights/%d.%s", userID, unixTime, helpers.GetExtensionFile(fh.Header.Get("Content-Type")))
 	m.CreatedAt = time.Now()
 
 	bodyweightID, err = u.repository.BodyWeight().Create(ctx, &m)
