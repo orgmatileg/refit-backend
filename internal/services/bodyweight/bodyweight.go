@@ -201,18 +201,21 @@ func (u bodyweight) UpdateByID(ctx context.Context, weight, date, bodyweightID s
 		_, err = s3.GetS3Client().PutObjectWithContext(
 			ctx,
 			"static-luqmanul",
-			fmt.Sprintf("refit/users/%s/bodyweights/%d.%s", mb.UserID, unixTime, helpers.GetExtensionFile(ft)),
+			fmt.Sprintf("refit/users/%d/bodyweights/%d.%s", mb.UserID, unixTime, helpers.GetExtensionFile(ft)),
 			f,
 			fh.Size,
 			minio.PutObjectOptions{
 				ContentType: ft,
+				UserMetadata: map[string]string{
+					"x-amz-acl": "public-read",
+				},
 			},
 		)
 		if err != nil {
 			logger.Infof("could not put object to spaces: %s", err.Error())
 			return err
 		}
-		image = fmt.Sprintf("https://static.luqmanul.com/refit/users/%s/bodyweights/%d.%s", mb.UserID, unixTime, helpers.GetExtensionFile(fh.Header.Get("Content-Type")))
+		image = fmt.Sprintf("https://static.luqmanul.com/refit/users/%d/bodyweights/%d.%s", mb.UserID, unixTime, helpers.GetExtensionFile(fh.Header.Get("Content-Type")))
 
 	}
 
