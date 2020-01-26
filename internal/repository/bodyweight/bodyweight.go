@@ -55,6 +55,7 @@ func (u bodyweight) Create(ctx context.Context, m *models.BodyWeight) (bodyweigh
 }
 
 func (u bodyweight) FindOneByID(ctx context.Context, bodyWeightID string) (m *models.BodyWeight, err error) {
+	m = new(models.BodyWeight)
 	q := `
 		SELECT id, weight, image, date, user_id, created_at
 		FROM body_weight
