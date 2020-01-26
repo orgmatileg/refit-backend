@@ -13,7 +13,7 @@ type IBodyWeight interface {
 	Create(ctx context.Context, m *models.BodyWeight) (bodyweightID uint, err error)
 	FindOneByID(ctx context.Context, bodyWeightID string) (m *models.BodyWeight, err error)
 	FindAll(ctx context.Context, limit, offset, order, userID string) (lm []*models.BodyWeight, err error)
-	UpdateByID(ctx context.Context, m *models.BodyWeight, bodyWeightID string) (rowUpdated int64, err error)
+	UpdateByID(ctx context.Context, m *models.BodyWeight) (rowUpdated int64, err error)
 	DeleteByID(ctx context.Context, bodyWeightID string) (rowDeleted int64, err error)
 	Count(ctx context.Context, userID string) (count uint, err error)
 }
@@ -111,7 +111,7 @@ func (u bodyweight) FindAll(ctx context.Context, limit, offset, order, userID st
 	return lm, nil
 }
 
-func (u bodyweight) UpdateByID(ctx context.Context, m *models.BodyWeight, bodyWeightID string) (rowUpdated int64, err error) {
+func (u bodyweight) UpdateByID(ctx context.Context, m *models.BodyWeight) (rowUpdated int64, err error) {
 	q := `
 	UPDATE body_weight
 	SET weight=?, date=?, image=?
@@ -121,7 +121,7 @@ func (u bodyweight) UpdateByID(ctx context.Context, m *models.BodyWeight, bodyWe
 		m.Weight,
 		m.Date,
 		m.Image,
-		bodyWeightID,
+		m.ID,
 	)
 	if err != nil {
 		return -1, err

@@ -107,7 +107,7 @@ func (s *serverHTTP) InitRouter() {
 	routerBodyWeight.POST("", s.GetHandler().BodyWeight().Create)
 	routerBodyWeight.GET("", s.GetHandler().BodyWeight().FindAll)
 	routerBodyWeight.GET("/:id", s.GetHandler().BodyWeight().FindOneByID)
-	routerBodyWeight.POST("/:id", s.GetHandler().BodyWeight().UpdateByID)
+	routerBodyWeight.PUT("/:id", s.GetHandler().BodyWeight().UpdateByID)
 	routerBodyWeight.DELETE("/:id", s.GetHandler().BodyWeight().DeleteByID)
 
 }

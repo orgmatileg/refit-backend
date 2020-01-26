@@ -29,7 +29,7 @@ type IBodyWeight interface {
 	Create(ctx context.Context, weight, date, userID string, fh *multipart.FileHeader) (bodyweightID uint, err error)
 	FindOneByID(ctx context.Context, bodyWeightID string) (m *models.BodyWeight, err error)
 	FindAll(ctx context.Context, limit, offset, order, userID string) (lm []*models.BodyWeight, count uint, err error)
-	UpdateByID(ctx context.Context, rm *models.BodyWeight, bodyweightID string) (err error)
+	UpdateByID(ctx context.Context, bodyweightID, weight, date, createdAt string, fh *multipart.FileHeader) (err error)
 	DeleteByID(ctx context.Context, bodyWeightID string) (err error)
 }
 
@@ -166,7 +166,7 @@ func (u bodyweight) FindAll(ctx context.Context, limit, offset, order, userID st
 	return lm, count, nil
 }
 
-func (u bodyweight) UpdateByID(ctx context.Context, rm *models.BodyWeight, bodyweightID string) (err error) {
+func (u bodyweight) UpdateByID(ctx context.Context, weight, date, bodyweightID, createdAt string, fh *multipart.FileHeader) (err error) {
 
 	mb, err := u.repository.BodyWeight().FindOneByID(ctx, bodyweightID)
 	if err != nil {
@@ -180,10 +180,70 @@ func (u bodyweight) UpdateByID(ctx context.Context, rm *models.BodyWeight, bodyw
 		}
 	}
 
-	rm.UserID = mb.UserID
-	rm.CreatedAt = mb.CreatedAt
+	var (
+		unixTime = time.Now().Unix()
+		image    = ""
+	)
 
-	_, err = u.repository.BodyWeight().UpdateByID(ctx, rm, bodyweightID)
+	if fh == nil {
+		image = mb.Image
+	} else {
+
+		f, err := fh.Open()
+		if err != nil {
+			logger.Infof("could not open file header %s", err.Error())
+			return err
+		}
+		defer f.Close()
+
+		ft := fh.Header.Get("Content-Type")
+
+		_, err = s3.GetS3Client().PutObjectWithContext(
+			ctx,
+			"static-luqmanul",
+			fmt.Sprintf("refit/users/%s/bodyweights/%d.%s", mb.UserID, unixTime, helpers.GetExtensionFile(ft)),
+			f,
+			fh.Size,
+			minio.PutObjectOptions{
+				ContentType: ft,
+			},
+		)
+		if err != nil {
+			logger.Infof("could not put object to spaces: %s", err.Error())
+			return err
+		}
+		image = fmt.Sprintf("https://static.luqmanul.com/refit/users/%s/bodyweights/%d.%s", mb.UserID, unixTime, helpers.GetExtensionFile(fh.Header.Get("Content-Type")))
+
+	}
+
+	t, err := time.Parse(time.RFC3339, date)
+	if err != nil {
+		logger.Infof("could not parse date: %s", err.Error())
+		return errors.New("invalid date")
+	}
+
+	intBodyWeightID, err := strconv.Atoi(bodyweightID)
+	if err != nil {
+		logger.Infof("could not parse bodyweight_id: %s", err.Error())
+		return errors.New("invalid date")
+	}
+
+	intWeight, err := strconv.Atoi(weight)
+	if err != nil {
+		logger.Infof("could not parse weight: %s", err.Error())
+		return errors.New("invalid date")
+	}
+
+	rm := models.BodyWeight{
+		ID:        uint(intBodyWeightID),
+		Weight:    float64(intWeight),
+		UserID:    mb.UserID,
+		CreatedAt: mb.CreatedAt,
+		Date:      t,
+		Image:     image,
+	}
+
+	_, err = u.repository.BodyWeight().UpdateByID(ctx, &rm)
 	if err != nil {
 		logger.Infof("could not update bodyweight by id: %s", err.Error())
 		return err

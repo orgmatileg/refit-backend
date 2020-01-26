@@ -1,13 +1,14 @@
 package bodyweight
 
 import (
-	"github.com/labstack/echo"
 	"net/http"
 	"refit_backend/internal/helpers"
 	"refit_backend/internal/logger"
 	"refit_backend/internal/services"
 	"refit_backend/models"
 	"strconv"
+
+	"github.com/labstack/echo"
 )
 
 type IBodyWeight interface {
@@ -107,18 +108,27 @@ func (b bodyweight) FindAll(c echo.Context) error {
 
 // UpdateByID delivery http users
 func (b bodyweight) UpdateByID(c echo.Context) error {
-	var rm models.BodyWeight
-	err := c.Bind(&rm)
-	if err != nil {
-		return err
+
+	fh, err := c.FormFile("image")
+	if err != nil && err.Error() != "http: no such file" {
+		logger.Infof("could not read form file from request: %s", err.Error())
+		return helpers.MakeDefaultResponse(c, http.StatusBadRequest, err)
 	}
-	bodyWeightID := c.Param("id")
-	ctx := c.Request().Context()
-	err = b.service.BodyWeight().UpdateByID(ctx, &rm, bodyWeightID)
+
+	var (
+		ctx          = c.Request().Context()
+		weight       = c.FormValue("weight")
+		createdAt    = c.FormValue("created_at")
+		date         = c.FormValue("date")
+		bodyWeightID = c.Param("id")
+	)
+
+	err = b.service.BodyWeight().UpdateByID(ctx, bodyWeightID, weight, date, createdAt, fh)
 	if err != nil {
 		return helpers.MakeDefaultResponse(c, http.StatusBadRequest, err)
 	}
 	return helpers.MakeDefaultResponse(c, http.StatusOK, nil)
+
 }
 
 // DeleteByID http users
