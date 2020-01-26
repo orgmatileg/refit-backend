@@ -91,6 +91,9 @@ func (u bodyweight) Create(ctx context.Context, weight, date, userID string, fh 
 			fh.Size,
 			minio.PutObjectOptions{
 				ContentType: ft,
+				UserMetadata: map[string]string{
+					"x-amz-acl": "public-read",
+				},
 			},
 		)
 		if err != nil {
