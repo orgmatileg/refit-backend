@@ -118,12 +118,11 @@ func (b bodyweight) UpdateByID(c echo.Context) error {
 	var (
 		ctx          = c.Request().Context()
 		weight       = c.FormValue("weight")
-		createdAt    = c.FormValue("created_at")
 		date         = c.FormValue("date")
 		bodyWeightID = c.Param("id")
 	)
 
-	err = b.service.BodyWeight().UpdateByID(ctx, bodyWeightID, weight, date, createdAt, fh)
+	err = b.service.BodyWeight().UpdateByID(ctx, bodyWeightID, weight, date, fh)
 	if err != nil {
 		return helpers.MakeDefaultResponse(c, http.StatusBadRequest, err)
 	}

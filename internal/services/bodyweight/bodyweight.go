@@ -29,7 +29,7 @@ type IBodyWeight interface {
 	Create(ctx context.Context, weight, date, userID string, fh *multipart.FileHeader) (bodyweightID uint, err error)
 	FindOneByID(ctx context.Context, bodyWeightID string) (m *models.BodyWeight, err error)
 	FindAll(ctx context.Context, limit, offset, order, userID string) (lm []*models.BodyWeight, count uint, err error)
-	UpdateByID(ctx context.Context, bodyweightID, weight, date, createdAt string, fh *multipart.FileHeader) (err error)
+	UpdateByID(ctx context.Context, bodyweightID, weight, date string, fh *multipart.FileHeader) (err error)
 	DeleteByID(ctx context.Context, bodyWeightID string) (err error)
 }
 
@@ -166,7 +166,7 @@ func (u bodyweight) FindAll(ctx context.Context, limit, offset, order, userID st
 	return lm, count, nil
 }
 
-func (u bodyweight) UpdateByID(ctx context.Context, weight, date, bodyweightID, createdAt string, fh *multipart.FileHeader) (err error) {
+func (u bodyweight) UpdateByID(ctx context.Context, weight, date, bodyweightID string, fh *multipart.FileHeader) (err error) {
 
 	mb, err := u.repository.BodyWeight().FindOneByID(ctx, bodyweightID)
 	if err != nil {
