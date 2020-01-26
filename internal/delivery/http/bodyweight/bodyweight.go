@@ -122,7 +122,7 @@ func (b bodyweight) UpdateByID(c echo.Context) error {
 		bodyWeightID = c.Param("id")
 	)
 
-	err = b.service.BodyWeight().UpdateByID(ctx, bodyWeightID, weight, date, fh)
+	err = b.service.BodyWeight().UpdateByID(ctx, weight, date, bodyWeightID, fh)
 	if err != nil {
 		return helpers.MakeDefaultResponse(c, http.StatusBadRequest, err)
 	}
