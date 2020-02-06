@@ -4,7 +4,7 @@ app:
   port: 1323
 
 mobile:
-  deeplink: refit//
+  deeplink: refit://
 
 jwt:
   secret: secret
