@@ -106,7 +106,7 @@ func (a auth) OAuthGoogleCallback(c echo.Context) error {
 		return c.Redirect(http.StatusTemporaryRedirect, constants.RedirectFailOAuth)
 	}
 
-	return c.Redirect(http.StatusTemporaryRedirect, fmt.Sprintf("exp://192.168.43.2:19000/--/home?setToken=%s", token))
+	return c.Redirect(http.StatusTemporaryRedirect, fmt.Sprintf("%s/--/home?setToken=%s", viper.GetString("mobile.deeplink"), token))
 }
 
 func (a auth) OAuthFacebookLogin(c echo.Context) error {
@@ -141,7 +141,7 @@ func (a auth) OAuthFacebookCallback(c echo.Context) error {
 		return c.Redirect(http.StatusTemporaryRedirect, constants.RedirectFailOAuth)
 	}
 
-	return c.Redirect(http.StatusTemporaryRedirect, fmt.Sprintf("exp://192.168.43.2:19000/--/home?setToken=%s", token))
+	return c.Redirect(http.StatusTemporaryRedirect, fmt.Sprintf("%s/--/home?setToken=%s", viper.GetString("mobile.deeplink"), token))
 }
 
 func (a auth) OAuthTwitterLogin(c echo.Context) error {
@@ -169,6 +169,6 @@ func (a auth) OAuthTwitterCallback(c echo.Context) error {
 		return c.Redirect(http.StatusTemporaryRedirect, constants.RedirectFailOAuth)
 	}
 
-	return c.Redirect(http.StatusTemporaryRedirect, fmt.Sprintf("exp://192.168.43.2:19000/--/home?setToken=%s", token))
+	return c.Redirect(http.StatusTemporaryRedirect, fmt.Sprintf("%s/--/home?setToken=%s", viper.GetString("mobile.deeplink"), token))
 
 }
